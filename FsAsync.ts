@@ -13,6 +13,14 @@ export class FsAsync {
         });
     }
 
+    static async exists(path: string) {
+        return new Promise<boolean>((resolve) => {
+            Fs.access(path, (err) => {
+                resolve(err == null);
+            });
+        })
+    }
+
     static async stat(path: string) {
         return new Promise<Fs.Stats>((resolve, reject) => {
             Fs.stat(path, (err, stat) => {
@@ -21,6 +29,17 @@ export class FsAsync {
                 resolve(stat);
             })
         })
+    }
+
+    static async readFile(path: string, encoding: BufferEncoding = "utf-8") {
+        return new Promise<string>((resolve, reject) => {
+            Fs.readFile(path, { encoding }, (err, content) => {
+                if (err)
+                    reject(err);
+
+                resolve(content);
+            });
+        });
     }
 
     static async deepReaddir(path: string) {
