@@ -72,15 +72,10 @@ export function extractEntryDirectory(globPattern: string) {
 
 export async function queryFiles(globPattern: string) {
     const entryPoint = extractEntryDirectory(globPattern);
-    console.log("EntryPoint", entryPoint);
-
     const regexp = createRegexFromPattern(globPattern);
-    console.log("regexp", regexp);
 
     const allFilePaths = await FsAsync.deepReaddir(entryPoint);
-    console.log("allFilepaths", allFilePaths);
-
     const filteredFilePaths = allFilePaths.filter(e => regexp.test(e));
-    console.log("filteredFilePaths", filteredFilePaths);
+
     return filteredFilePaths;
 }
