@@ -1,0 +1,19 @@
+{
+    "compilerOptions": {
+        "module": "commonjs",
+        "target": "es2019",
+        "sourceMap": true,
+        "experimentalDecorators": true,
+        "noImplicitReturns": true,
+        "declaration": true,
+        "noImplicitThis": true,
+        "strictFunctionTypes": true,
+        "keyofStringsOnly": true,
+        "incremental": true,
+        "allowSyntheticDefaultImports": true
+    },
+    "exclude": [
+        "node_modules",
+        "typings"
+    ]
+}

@@ -1,0 +1,30 @@
+{
+  "name": "atf",
+  "version": "1.0.0",
+  "description": "",
+  "main": "Runner.js",
+  "scripts": {
+    "test": "mocha 'Tests/**/*.js' --recursive --reporter spec"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Jswk1/ATF.git"
+  },
+  "author": "Jan Siwek",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Jswk1/ATF/issues"
+  },
+  "bin": {
+    "atf-runner": "bin/atf.js"
+  },
+  "homepage": "https://github.com/Jswk1/ATF#readme",
+  "devDependencies": {
+    "typescript": "4.4.3",
+    "@types/node": "16.10.2",
+    "mocha": "9.1.2",
+    "chai": "4.3.4",
+    "@types/mocha": "9.0.0",
+    "@types/chai": "4.2.22"
+  }
+}
