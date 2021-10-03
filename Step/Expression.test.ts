@@ -1,7 +1,6 @@
 import { expect } from "chai";
-import { defineStep } from "../Runner";
 import { stepConvertExpressions, extractVariables } from "./Expression";
-import { stepDefinitions } from "./Step";
+import { defineStep, stepDefinitions } from "./Step";
 
 describe("Step Expression Tests", () => {
     describe("stepConvertExpressions", () => {

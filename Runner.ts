@@ -2,11 +2,12 @@
 
 import { argv } from "process";
 import * as Path from "path";
-import "./StepExpression";
+import "./Step/Expression";
 import { executeFeature, OutcomeStatus } from "./Feature/Executor";
 import { loadFeature } from "./Feature/Loader";
 import { stepDefinitions } from "./Step/Step";
 import { queryFiles } from "./Utils/QueryFiles";
+import { reportFeature } from "./Feature/Reporter";
 
 interface IOptions {
     path: string;
@@ -66,6 +67,7 @@ async function execute() {
     const featureOutcome = await executeFeature(feature);
 
     /** Report results */
+    await reportFeature(featureOutcome);
 
     process.exit(featureOutcome.status === OutcomeStatus.Ok ? 0 : 1);
 }
@@ -75,3 +77,4 @@ async function execute() {
 })();
 
 export { defineStep } from "./Step/Step";
+export { defineExpression } from "./Step/Expression";

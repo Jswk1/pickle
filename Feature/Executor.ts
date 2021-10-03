@@ -18,13 +18,13 @@ interface IStepOutcome {
 interface IScenarioOutcome {
     scenario: IScenario;
     status: OutcomeStatus;
-    steps: IStepOutcome[];
+    stepOutcomes: IStepOutcome[];
 }
 
-interface IFeatureOutcome {
+export interface IFeatureOutcome {
     feature: IFeature;
     status: OutcomeStatus;
-    scenarios: IScenarioOutcome[];
+    scenarioOutcomes: IScenarioOutcome[];
 }
 
 async function runWithTimeout(timeoutMS: number, runFn: () => Promise<any>, onTimeoutError: string) {
@@ -40,7 +40,7 @@ export async function executeFeature(feature: IFeature) {
     const featureOutcome: IFeatureOutcome = {
         feature,
         status: OutcomeStatus.Ok,
-        scenarios: []
+        scenarioOutcomes: []
     }
 
     console.log(`=================================`);
@@ -52,12 +52,12 @@ export async function executeFeature(feature: IFeature) {
         const scenarioOutcome: IScenarioOutcome = {
             scenario,
             status: OutcomeStatus.Ok,
-            steps: []
+            stepOutcomes: []
         }
 
-        featureOutcome.scenarios.push(scenarioOutcome);
+        featureOutcome.scenarioOutcomes.push(scenarioOutcome);
 
-        console.log(`▶ Scenario: ${scenario.name}`);
+        console.log(`  - Scenario: ${scenario.name}`);
         const stepList: IStep[] = [...feature.backgroundSteps, ...scenario.steps];
 
         for (let j = 0; j < stepList.length; j++) {
@@ -67,10 +67,10 @@ export async function executeFeature(feature: IFeature) {
                 status: OutcomeStatus.Ok
             };
 
-            scenarioOutcome.steps.push(stepOutcome);
+            scenarioOutcome.stepOutcomes.push(stepOutcome);
 
             const variables = extractVariables(step);
-            console.log(` ↳ Step: ${step.description}`);
+            console.log(`     - Step: ${step.description}`);
 
             const { timeoutMS } = step.definition.options;
             try {
@@ -82,7 +82,7 @@ export async function executeFeature(feature: IFeature) {
                 stepOutcome.error = ex;
 
                 /** Skip remaining steps */
-                stepList.slice(j + 1).forEach(e => scenarioOutcome.steps.push({
+                stepList.slice(j + 1).forEach(e => scenarioOutcome.stepOutcomes.push({
                     status: OutcomeStatus.Skipped,
                     step: e
                 }));
