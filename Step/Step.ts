@@ -32,7 +32,7 @@ export function defineStep(pattern: string, options: any, cb?: any) {
 
     if (typeof options === "function") {
         cb = options;
-        options = { timeoutMS: 10000 };
+        options = <IStepOptions>{ timeoutMS: 10000 };
     }
 
     const expression = stepConvertExpressions(pattern);
