@@ -3,6 +3,7 @@ import { IStep } from "./Step";
 import { extractVariables } from "./StepExpression";
 
 export async function executeFeature(feature: IFeature) {
+    const context = { variables: {} };
 
     for (const scenario of feature.scenarios) {
         const stepList: IStep[] = [...feature.backgroundSteps, ...scenario.steps];
@@ -12,7 +13,7 @@ export async function executeFeature(feature: IFeature) {
             console.log(`Step: ${step.description}`);
 
             const variables = extractVariables(step);
-            await step.definition.cb.call({}/*todo*/, variables);
+            await step.definition.cb.call(context, variables);
         }
     }
 
