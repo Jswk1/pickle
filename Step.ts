@@ -1,9 +1,12 @@
+import { IStepExpression, stepConvertExpressions } from "./StepExpression";
+
 type TCallbackFuntion = (...args: any[]) => void | Promise<void>;
 
 interface IStepDefinition {
     pattern: string;
     options: IStepOptions;
     cb: TCallbackFuntion;
+    expression: IStepExpression;
 }
 
 interface IStepOptions {
@@ -11,7 +14,6 @@ interface IStepOptions {
 }
 
 export const loadedSteps = new Map<string, IStepDefinition>();
-
 
 export function defineStep(pattern: string, cb: TCallbackFuntion): void;
 export function defineStep(pattern: string, options: any, cb?: any) {
@@ -23,5 +25,7 @@ export function defineStep(pattern: string, options: any, cb?: any) {
         options = { timeoutMS: 10000 };
     }
 
-    loadedSteps.set(pattern, { pattern, options, cb });
+    const expression = stepConvertExpressions(pattern);
+
+    loadedSteps.set(pattern, { pattern, options, cb, expression });
 }

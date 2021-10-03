@@ -5,6 +5,7 @@ import * as Path from "path";
 import { queryFiles } from "./QueryFiles";
 import { loadedSteps } from "./Step";
 import { loadFeature } from "./FeatureLoader";
+import "./StepExpression";
 
 interface IOptions {
     path: string;
