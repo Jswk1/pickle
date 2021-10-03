@@ -88,3 +88,6 @@ Example:
 pickle -r ./Flows/**/*.js ./test.feature
 ```
 
+# Not supported yet
+* Custom regex in step name
+* Data tables in features
