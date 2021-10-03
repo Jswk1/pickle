@@ -13,6 +13,11 @@ interface IStepOptions {
     timeoutMS?: number;
 }
 
+export interface IStep {
+    description: string;
+    definition: IStepDefinition;
+}
+
 export const stepDefinitions = new Map<string, IStepDefinition>();
 
 export function defineStep(pattern: string, cb: TCallbackFuntion): void;

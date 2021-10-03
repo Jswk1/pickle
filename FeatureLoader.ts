@@ -1,12 +1,7 @@
 import { FsAsync } from "./FsAsync";
-import { findStepDefinition, IStepDefinition } from "./Step";
+import { findStepDefinition, IStep } from "./Step";
 
-interface IStep {
-    step: string;
-    definition: IStepDefinition;
-}
-
-interface IFeature {
+export interface IFeature {
     name: string;
     backgroundSteps: IStep[];
     scenarios: Array<{
@@ -85,14 +80,14 @@ export async function loadFeature(featurePath: string) {
                     const backgroundStepDef = findStepDefinition(step);
 
                     const lastFeature = getLastFeature();
-                    lastFeature.backgroundSteps.push({ step, definition: backgroundStepDef });
+                    lastFeature.backgroundSteps.push({ description: step, definition: backgroundStepDef });
                     break;
 
                 case GherkinScope.Scenario:
                     const scenarioStepDef = findStepDefinition(step);
 
                     const lastScenario = getLastScenario();
-                    lastScenario.steps.push({ step, definition: scenarioStepDef });
+                    lastScenario.steps.push({ description: step, definition: scenarioStepDef });
                     break;
                 default:
                     throw new Error("Unexpected scope: " + currentScope);
@@ -100,5 +95,9 @@ export async function loadFeature(featurePath: string) {
         }
     }
 
-    console.log(features);
+    // Should only support single feature per file, so throw error if found more
+    if (features.length > 1)
+        throw new Error("Multiple features per file are not allowed.");
+
+    return features[0];
 }

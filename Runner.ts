@@ -6,6 +6,7 @@ import { queryFiles } from "./QueryFiles";
 import { stepDefinitions } from "./Step";
 import { loadFeature } from "./FeatureLoader";
 import "./StepExpression";
+import { executeFeature } from "./FeatureExecutor";
 
 interface IOptions {
     path: string;
@@ -61,7 +62,8 @@ async function execute() {
         console.log(key);
 
     const featureFileFullPath = Path.join(executionDirectory, options.featureName);
-    await loadFeature(featureFileFullPath);
+    const feature = await loadFeature(featureFileFullPath);
+    await executeFeature(feature);
 }
 
 (async () => {
