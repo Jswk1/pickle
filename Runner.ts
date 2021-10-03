@@ -2,11 +2,11 @@
 
 import { argv } from "process";
 import * as Path from "path";
-import { queryFiles } from "./QueryFiles";
-import { stepDefinitions } from "./Step";
-import { loadFeature } from "./FeatureLoader";
 import "./StepExpression";
-import { executeFeature, OutcomeStatus } from "./FeatureExecutor";
+import { executeFeature, OutcomeStatus } from "./Feature/Executor";
+import { loadFeature } from "./Feature/Loader";
+import { stepDefinitions } from "./Step/Step";
+import { queryFiles } from "./Utils/QueryFiles";
 
 interface IOptions {
     path: string;
@@ -74,4 +74,4 @@ async function execute() {
     await execute();
 })();
 
-export { defineStep } from "./Step";
+export { defineStep } from "./Step/Step";

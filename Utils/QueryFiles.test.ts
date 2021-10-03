@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { createRegexFromPattern, extractEntryDirectory } from "../QueryFiles";
+import { extractEntryDirectory, createRegexFromPattern } from "./QueryFiles";
 
 describe("Glob Pattern Tests", () => {
     describe("extractEntryDirectory", () => {

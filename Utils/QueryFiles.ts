@@ -1,4 +1,4 @@
-import { FsAsync } from "../FsAsync";
+import { FsAsync } from "./FsAsync";
 
 export function createRegexFromPattern(globPattern: string) {
     let regexpString = "^";

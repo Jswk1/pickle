@@ -1,6 +1,6 @@
-import { IFeature, IScenario } from "../FeatureLoader";
-import { IStep } from "../Step";
-import { extractVariables } from "../StepExpression";
+import { extractVariables } from "../Step/Expression";
+import { IStep } from "../Step/Step";
+import { IScenario, IFeature } from "./Loader";
 
 export enum OutcomeStatus {
     Ok = 1,

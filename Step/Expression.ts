@@ -1,4 +1,4 @@
-import { IStep } from "../Step";
+import { IStep } from "./Step";
 
 export const stepExpressions = new Map<string, IStepExpressionDef>();
 

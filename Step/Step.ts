@@ -1,4 +1,4 @@
-import { IStepExpression, stepConvertExpressions } from "../StepExpression";
+import { IStepExpression, stepConvertExpressions } from "./Expression";
 
 type TContext = {
     variables: {

@@ -1,5 +1,5 @@
-import { FsAsync } from "../FsAsync";
-import { findStepDefinition, IStep } from "../Step";
+import { IStep, findStepDefinition } from "../Step/Step";
+import { FsAsync } from "../Utils/FsAsync";
 
 export interface IScenario {
     name: string;
