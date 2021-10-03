@@ -1,13 +1,15 @@
-import { FsAsync } from "./FsAsync";
-import { findStepDefinition, IStep } from "./Step";
+import { FsAsync } from "../FsAsync";
+import { findStepDefinition, IStep } from "../Step";
+
+export interface IScenario {
+    name: string;
+    steps: IStep[];
+}
 
 export interface IFeature {
     name: string;
     backgroundSteps: IStep[];
-    scenarios: Array<{
-        name: string;
-        steps: IStep[];
-    }>;
+    scenarios: IScenario[];
 }
 
 const gherkinSectionExpr = /^([A-Za-z]+)\:\s{0,}(.*)(?:\r\n)?$/;

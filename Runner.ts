@@ -6,7 +6,7 @@ import { queryFiles } from "./QueryFiles";
 import { stepDefinitions } from "./Step";
 import { loadFeature } from "./FeatureLoader";
 import "./StepExpression";
-import { executeFeature } from "./FeatureExecutor";
+import { executeFeature, OutcomeStatus } from "./FeatureExecutor";
 
 interface IOptions {
     path: string;
@@ -63,7 +63,11 @@ async function execute() {
 
     const featureFileFullPath = Path.join(executionDirectory, options.featureName);
     const feature = await loadFeature(featureFileFullPath);
-    await executeFeature(feature);
+    const featureOutcome = await executeFeature(feature);
+
+    /** Report results */
+
+    process.exit(featureOutcome.status === OutcomeStatus.Ok ? 0 : 1);
 }
 
 (async () => {

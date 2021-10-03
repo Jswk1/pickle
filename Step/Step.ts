@@ -1,11 +1,11 @@
-import { IStepExpression, stepConvertExpressions } from "./StepExpression";
+import { IStepExpression, stepConvertExpressions } from "../StepExpression";
 
 type TContext = {
     variables: {
         [key: string]: any;
     }
 }
-type TCallbackFuntion = (this: TContext, ...args: any[]) => void | Promise<void>;
+export type TCallbackFuntion = (this: TContext, ...args: any[]) => Promise<void>;
 
 export interface IStepDefinition {
     pattern: string;
