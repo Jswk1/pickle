@@ -8,17 +8,17 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Jswk1/ATF.git"
+    "url": "git+https://github.com/Jswk1/pickle.git"
   },
   "author": "Jan Siwek",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/Jswk1/ATF/issues"
+    "url": "https://github.com/Jswk1/pickle/issues"
   },
   "bin": {
     "pickle": "bin/pickle.js"
   },
-  "homepage": "https://github.com/Jswk1/ATF#readme",
+  "homepage": "https://github.com/Jswk1/pickle#readme",
   "devDependencies": {
     "typescript": "4.4.3",
     "mocha": "9.1.2",
