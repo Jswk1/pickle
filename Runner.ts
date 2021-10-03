@@ -3,7 +3,7 @@
 import { argv } from "process";
 import * as Path from "path";
 import { queryFiles } from "./QueryFiles";
-import { loadedSteps } from "./Step";
+import { stepDefinitions } from "./Step";
 import { loadFeature } from "./FeatureLoader";
 import "./StepExpression";
 
@@ -57,7 +57,7 @@ async function execute() {
     }
 
     console.log("Loaded steps");
-    for (const [key, stepDefinition] of loadedSteps)
+    for (const [key, stepDefinition] of stepDefinitions)
         console.log(key);
 
     const featureFileFullPath = Path.join(executionDirectory, options.featureName);

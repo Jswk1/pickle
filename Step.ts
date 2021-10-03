@@ -2,7 +2,7 @@ import { IStepExpression, stepConvertExpressions } from "./StepExpression";
 
 type TCallbackFuntion = (...args: any[]) => void | Promise<void>;
 
-interface IStepDefinition {
+export interface IStepDefinition {
     pattern: string;
     options: IStepOptions;
     cb: TCallbackFuntion;
@@ -13,11 +13,11 @@ interface IStepOptions {
     timeoutMS?: number;
 }
 
-export const loadedSteps = new Map<string, IStepDefinition>();
+export const stepDefinitions = new Map<string, IStepDefinition>();
 
 export function defineStep(pattern: string, cb: TCallbackFuntion): void;
 export function defineStep(pattern: string, options: any, cb?: any) {
-    if (loadedSteps.has(pattern))
+    if (stepDefinitions.has(pattern))
         throw new Error(`Step '${pattern}' is defined multiple times.`);
 
     if (typeof options === "function") {
@@ -27,5 +27,14 @@ export function defineStep(pattern: string, options: any, cb?: any) {
 
     const expression = stepConvertExpressions(pattern);
 
-    loadedSteps.set(pattern, { pattern, options, cb, expression });
+    stepDefinitions.set(pattern, { pattern, options, cb, expression });
+}
+
+export function findStepDefinition(step: string) {
+    const stepDef = Array.from(stepDefinitions.values()).find(e => e.expression.regexp.test(step));
+
+    if (!stepDef)
+        throw new Error(`Unsupported step '${step}'`);
+
+    return stepDef;
 }

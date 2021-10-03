@@ -1,11 +1,17 @@
 import { FsAsync } from "./FsAsync";
+import { findStepDefinition, IStepDefinition } from "./Step";
+
+interface IStep {
+    step: string;
+    definition: IStepDefinition;
+}
 
 interface IFeature {
     name: string;
-    backgroundSteps: string[];
+    backgroundSteps: IStep[];
     scenarios: Array<{
         name: string;
-        steps: string[];
+        steps: IStep[];
     }>;
 }
 
@@ -48,14 +54,14 @@ export async function loadFeature(featurePath: string) {
     let currentScope: GherkinScope;
 
     for (let i = 0; i < featureLines.length; i++) {
-        const line = featureLines[i].trim();
+        const step = featureLines[i].trim();
 
-        console.log("Gherkin line: ", line);
+        console.log("Gherkin line: ", step);
 
-        if (line === "")
+        if (step === "")
             continue;
 
-        const sectionMatch = gherkinSectionExpr.exec(line);
+        const sectionMatch = gherkinSectionExpr.exec(step);
         if (sectionMatch) {
             const scope = getGherkinScope(sectionMatch[1]);
 
@@ -76,15 +82,18 @@ export async function loadFeature(featurePath: string) {
                     throw new Error("Unexpected line in feature scope.");
 
                 case GherkinScope.Background:
+                    const backgroundStepDef = findStepDefinition(step);
+
                     const lastFeature = getLastFeature();
-                    lastFeature.backgroundSteps.push(line);
+                    lastFeature.backgroundSteps.push({ step, definition: backgroundStepDef });
                     break;
 
                 case GherkinScope.Scenario:
-                    const lastScenario = getLastScenario();
-                    lastScenario.steps.push(line);
-                    break;
+                    const scenarioStepDef = findStepDefinition(step);
 
+                    const lastScenario = getLastScenario();
+                    lastScenario.steps.push({ step, definition: scenarioStepDef });
+                    break;
                 default:
                     throw new Error("Unexpected scope: " + currentScope);
             }
