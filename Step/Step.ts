@@ -26,18 +26,19 @@ export interface IStep {
 export const stepDefinitions = new Map<string, IStepDefinition>();
 
 export function defineStep(pattern: string, cb: TCallbackFuntion): void;
-export function defineStep(pattern: string, options: any, cb?: any) {
+export function defineStep(pattern: string, options: IStepOptions, cb?: TCallbackFuntion): void
+export function defineStep(pattern: string, secondArg: IStepOptions | TCallbackFuntion, thirdArg?: TCallbackFuntion) {
     if (stepDefinitions.has(pattern))
         throw new Error(`Step '${pattern}' is defined multiple times.`);
 
-    if (typeof options === "function") {
-        cb = options;
-        options = <IStepOptions>{ timeoutMS: 10000 };
+    if (typeof secondArg === "function") {
+        thirdArg = secondArg;
+        secondArg = <IStepOptions>{ timeoutMS: 10000 };
     }
 
     const expression = stepConvertExpressions(pattern);
 
-    stepDefinitions.set(pattern, { pattern, options, cb, expression });
+    stepDefinitions.set(pattern, { pattern, options: secondArg, cb: thirdArg, expression });
 }
 
 export function findStepDefinition(step: string) {
