@@ -13,6 +13,7 @@ export interface IFeature {
 }
 
 const gherkinSectionExpr = /^([A-Za-z]+)\:\s{0,}(.*)(?:\r\n)?$/;
+const gherkinStepExpr = /^(?:given|when|then|and)(.*)$/i;
 
 enum GherkinScope {
     Feature = 0,
@@ -53,8 +54,6 @@ export async function loadFeature(featurePath: string) {
     for (let i = 0; i < featureLines.length; i++) {
         const step = featureLines[i].trim();
 
-        console.log("Gherkin line: ", step);
-
         if (step === "")
             continue;
 
@@ -86,10 +85,16 @@ export async function loadFeature(featurePath: string) {
                     break;
 
                 case GherkinScope.Scenario:
-                    const scenarioStepDef = findStepDefinition(step);
+                    const stepMatch = gherkinStepExpr.exec(step);
+                    if (!stepMatch)
+                        throw new Error("Incorrect step format: " + step);
 
+                    const stepName = stepMatch[1].trim();
+
+                    const scenarioStepDef = findStepDefinition(stepName);
                     const lastScenario = getLastScenario();
-                    lastScenario.steps.push({ description: step, definition: scenarioStepDef });
+
+                    lastScenario.steps.push({ description: stepName, definition: scenarioStepDef });
                     break;
                 default:
                     throw new Error("Unexpected scope: " + currentScope);

@@ -25,6 +25,7 @@ export interface IFeatureOutcome {
     feature: IFeature;
     status: OutcomeStatus;
     scenarioOutcomes: IScenarioOutcome[];
+    error?: Error;
 }
 
 async function runWithTimeout(timeoutMS: number, runFn: () => Promise<any>, onTimeoutError: string) {
@@ -75,11 +76,11 @@ export async function executeFeature(feature: IFeature) {
             const { timeoutMS } = step.definition.options;
             try {
                 await runWithTimeout(timeoutMS, async () => {
-                    await step.definition.cb.call(context, variables);
+                    await step.definition.cb.apply(context, variables);
                 }, `Timeout after ${timeoutMS} milliseconds.`);
             } catch (ex) {
                 featureOutcome.status = scenarioOutcome.status = stepOutcome.status = OutcomeStatus.Error;
-                stepOutcome.error = ex;
+                featureOutcome.error = stepOutcome.error = ex;
 
                 /** Skip remaining steps */
                 stepList.slice(j + 1).forEach(e => scenarioOutcome.stepOutcomes.push({

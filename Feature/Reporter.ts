@@ -15,5 +15,8 @@ export async function reportFeature(featureOutcome: IFeatureOutcome) {
 
         const total = Object.values(count).reduce((p, c) => p + c, 0);
         console.log(`      - Summary: ${count[OutcomeStatus.Ok]}/${total}`);
+
+        if (featureOutcome.error)
+            console.log(featureOutcome.error);
     }
 }
