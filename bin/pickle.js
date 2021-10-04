@@ -1,3 +1,3 @@
 #!/usr/bin/env node
 
-require("../Runner.js");
+require("../Runner.js").default();

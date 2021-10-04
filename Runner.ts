@@ -7,6 +7,7 @@ import { executeFeature, OutcomeStatus } from "./Feature/Executor";
 import { loadFeature } from "./Feature/Loader";
 import { queryFiles } from "./Utils/QueryFiles";
 import { reportFeature } from "./Feature/Reporter";
+import { Log } from "./Utils/Log";
 
 interface IOptions {
     path: string;
@@ -45,35 +46,31 @@ function parseArgs(): IOptions {
     return options;
 }
 
-async function execute() {
-    const options = parseArgs();
+export default async function execute() {
+    try {
+        const options = parseArgs();
 
-    const stepDefinitionFiles = await queryFiles(options.path);
-    const executionDirectory = process.cwd();
+        const stepDefinitionFiles = await queryFiles(options.path);
+        const executionDirectory = process.cwd();
 
-    for (const file of stepDefinitionFiles) {
-        const fullPath = Path.join(executionDirectory, file);
-        require(fullPath);
+        for (const file of stepDefinitionFiles) {
+            const fullPath = Path.join(executionDirectory, file);
+            require(fullPath);
+        }
+
+        const featureFileFullPath = Path.join(executionDirectory, options.featureName);
+        const feature = await loadFeature(featureFileFullPath);
+        const featureOutcome = await executeFeature(feature);
+
+        /** Report results */
+        await reportFeature(featureOutcome);
+
+        process.exit(featureOutcome.status === OutcomeStatus.Ok ? 0 : 1);
+    } catch (ex) {
+        Log.error(ex);
+        process.exit(1);
     }
-
-    const featureFileFullPath = Path.join(executionDirectory, options.featureName);
-    const feature = await loadFeature(featureFileFullPath);
-    const featureOutcome = await executeFeature(feature);
-
-    /** Report results */
-    await reportFeature(featureOutcome);
-
-    process.exit(featureOutcome.status === OutcomeStatus.Ok ? 0 : 1);
 }
-
-(async () => {
-    // try {
-    await execute();
-    // } catch (ex) {
-    // console.log(ex);
-    // process.exit(1);
-    // }
-})();
 
 export { defineStep } from "./Step/Step";
 export { defineExpression } from "./Step/Expression";
