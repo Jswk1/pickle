@@ -71,7 +71,7 @@ export function stepConvertExpressions(step: string): IStepExpression {
 
 export function extractVariables(step: IStep) {
     const variables = [];
-    const match = step.definition.expression.regexp.exec(step.description);
+    const match = step.definition.expression.regexp.exec(step.name);
     if (!match)
         throw new Error(`Couldn't extract variables from step '${step.definition}'.`);
 

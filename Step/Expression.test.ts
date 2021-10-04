@@ -35,7 +35,7 @@ describe("Step Expression Tests", () => {
             defineStep(description1, () => undefined);
             const definition1 = stepDefinitions.get(description1);
 
-            expect(extractVariables({ description: "Step 1 with 2 integers.", definition: definition1 })).to.eql([1, 2]);
+            expect(extractVariables({ name: "Step 1 with 2 integers.", definition: definition1 })).to.eql([1, 2]);
         });
 
         it("should should extract decimals", () => {
@@ -43,7 +43,7 @@ describe("Step Expression Tests", () => {
             defineStep(description1, () => undefined);
             const definition1 = stepDefinitions.get(description1);
 
-            expect(extractVariables({ description: "Number 10 divided by 2.5 gives 4", definition: definition1 })).to.eql([10, 2.5, 4]);
+            expect(extractVariables({ name: "Number 10 divided by 2.5 gives 4", definition: definition1 })).to.eql([10, 2.5, 4]);
         });
 
         it("should should extract strings", () => {
@@ -51,7 +51,7 @@ describe("Step Expression Tests", () => {
             defineStep(description1, () => undefined);
             const definition1 = stepDefinitions.get(description1);
 
-            expect(extractVariables({ description: `Someone once said "To be or not to be" and then "that is "the" question".`, definition: definition1 })).to.eql(["To be or not to be", `that is "the" question`]);
+            expect(extractVariables({ name: `Someone once said "To be or not to be" and then "that is "the" question".`, definition: definition1 })).to.eql(["To be or not to be", `that is "the" question`]);
         });
 
         it("should should extract multiple types", () => {
@@ -59,7 +59,7 @@ describe("Step Expression Tests", () => {
             defineStep(description1, () => undefined);
             const definition1 = stepDefinitions.get(description1);
 
-            expect(extractVariables({ description: `Step with integer 1234 and decimal -6.4 with string "lol" included.`, definition: definition1 })).to.eql([1234, -6.4, "lol"]);
+            expect(extractVariables({ name: `Step with integer 1234 and decimal -6.4 with string "lol" included.`, definition: definition1 })).to.eql([1234, -6.4, "lol"]);
         });
     });
 });

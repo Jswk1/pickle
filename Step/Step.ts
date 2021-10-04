@@ -19,7 +19,7 @@ interface IStepOptions {
 }
 
 export interface IStep {
-    description: string;
+    name: string;
     definition: IStepDefinition;
 }
 

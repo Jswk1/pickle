@@ -72,7 +72,7 @@ export async function executeFeature(feature: IFeature) {
             scenarioOutcome.stepOutcomes.push(stepOutcome);
 
             const variables = extractVariables(step);
-            Log.debug(`     - Step: ${step.description}`);
+            Log.debug(`     - Step: ${step.name}`);
 
             const { timeoutMS } = step.definition.options;
             try {
