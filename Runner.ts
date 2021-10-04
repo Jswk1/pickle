@@ -5,7 +5,6 @@ import * as Path from "path";
 import "./Step/Expression";
 import { executeFeature, OutcomeStatus } from "./Feature/Executor";
 import { loadFeature } from "./Feature/Loader";
-import { stepDefinitions } from "./Step/Step";
 import { queryFiles } from "./Utils/QueryFiles";
 import { reportFeature } from "./Feature/Reporter";
 
@@ -54,13 +53,8 @@ async function execute() {
 
     for (const file of stepDefinitionFiles) {
         const fullPath = Path.join(executionDirectory, file);
-        console.log(`Loading file: ${fullPath}`);
         require(fullPath);
     }
-
-    console.log("Loaded steps");
-    for (const [key, stepDefinition] of stepDefinitions)
-        console.log(key);
 
     const featureFileFullPath = Path.join(executionDirectory, options.featureName);
     const feature = await loadFeature(featureFileFullPath);
@@ -73,7 +67,12 @@ async function execute() {
 }
 
 (async () => {
+    // try {
     await execute();
+    // } catch (ex) {
+    // console.log(ex);
+    // process.exit(1);
+    // }
 })();
 
 export { defineStep } from "./Step/Step";

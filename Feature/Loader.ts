@@ -1,5 +1,6 @@
-import { IStep, findStepDefinition } from "../Step/Step";
+import { IStep, findStepDefinition, stepDefinitions } from "../Step/Step";
 import { FsAsync } from "../Utils/FsAsync";
+import { Log } from "../Utils/Log";
 
 export interface IScenario {
     name: string;
@@ -35,6 +36,11 @@ function getGherkinScope(text: string) {
 }
 
 export async function loadFeature(featurePath: string) {
+    Log.debug("Loaded steps");
+    console.trace();
+    for (const [key, stepDefinition] of stepDefinitions)
+        Log.debug(key);
+
     const exists = await FsAsync.exists(featurePath);
 
     if (!exists)

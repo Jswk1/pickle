@@ -1,22 +1,23 @@
+import { Log } from "../Utils/Log";
 import { IFeatureOutcome, OutcomeStatus } from "./Executor";
 
 export async function reportFeature(featureOutcome: IFeatureOutcome) {
-    console.log("");
-    console.log(`== ${featureOutcome.feature.name} ==`);
+    Log.info("");
+    Log.info(`== ${featureOutcome.feature.name} ==`);
     for (const scenarioOutcome of featureOutcome.scenarioOutcomes) {
         const count: { [key: number]: number } = { [OutcomeStatus.Ok]: 0, [OutcomeStatus.Error]: 0, [OutcomeStatus.Warning]: 0, [OutcomeStatus.Skipped]: 0 };
         for (const step of scenarioOutcome.stepOutcomes)
             count[step.status]++;
 
-        console.log(`  - ${scenarioOutcome.scenario.name}`);
-        console.log(`      - Ok: ${count[OutcomeStatus.Ok]}`);
-        console.log(`      - Error: ${count[OutcomeStatus.Error]}`);
-        console.log(`      - Skipped: ${count[OutcomeStatus.Skipped]}`);
+        Log.info(`  - ${scenarioOutcome.scenario.name}`);
+        Log.info(`      - Ok: ${count[OutcomeStatus.Ok]}`);
+        Log.info(`      - Error: ${count[OutcomeStatus.Error]}`);
+        Log.info(`      - Skipped: ${count[OutcomeStatus.Skipped]}`);
 
         const total = Object.values(count).reduce((p, c) => p + c, 0);
-        console.log(`      - Summary: ${count[OutcomeStatus.Ok]}/${total}`);
+        Log.info(`      - Summary: ${count[OutcomeStatus.Ok]}/${total}`);
 
         if (featureOutcome.error)
-            console.log(featureOutcome.error);
+            Log.info(featureOutcome.error);
     }
 }

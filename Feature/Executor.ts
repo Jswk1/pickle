@@ -1,5 +1,6 @@
 import { extractVariables } from "../Step/Expression";
 import { IStep } from "../Step/Step";
+import { Log } from "../Utils/Log";
 import { IScenario, IFeature } from "./Loader";
 
 export enum OutcomeStatus {
@@ -44,9 +45,9 @@ export async function executeFeature(feature: IFeature) {
         scenarioOutcomes: []
     }
 
-    console.log(`=================================`);
-    console.log(`Feature: ${feature.name}`);
-    console.log(`=================================`);
+    Log.debug(`=================================`);
+    Log.debug(`Feature: ${feature.name}`);
+    Log.debug(`=================================`);
 
     for (let i = 0; i < feature.scenarios.length; i++) {
         const scenario = feature.scenarios[i];
@@ -58,7 +59,7 @@ export async function executeFeature(feature: IFeature) {
 
         featureOutcome.scenarioOutcomes.push(scenarioOutcome);
 
-        console.log(`  - Scenario: ${scenario.name}`);
+        Log.debug(`  - Scenario: ${scenario.name}`);
         const stepList: IStep[] = [...feature.backgroundSteps, ...scenario.steps];
 
         for (let j = 0; j < stepList.length; j++) {
@@ -71,7 +72,7 @@ export async function executeFeature(feature: IFeature) {
             scenarioOutcome.stepOutcomes.push(stepOutcome);
 
             const variables = extractVariables(step);
-            console.log(`     - Step: ${step.description}`);
+            Log.debug(`     - Step: ${step.description}`);
 
             const { timeoutMS } = step.definition.options;
             try {
