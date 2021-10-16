@@ -1,6 +1,7 @@
 import { extractVariables } from "../Step/Expression";
 import { IStep } from "../Step/Step";
 import { Log } from "../Utils/Log";
+import { measureMiliseconds } from "../Utils/Time";
 import { IScenario, IFeature } from "./Loader";
 
 export enum OutcomeStatus {
@@ -14,6 +15,7 @@ interface IStepOutcome {
     step: IStep;
     status: OutcomeStatus;
     error?: Error;
+    durationMs: number;
 }
 
 interface IScenarioOutcome {
@@ -66,7 +68,8 @@ export async function executeFeature(feature: IFeature) {
             const step = stepList[j];
             const stepOutcome: IStepOutcome = {
                 step,
-                status: OutcomeStatus.Ok
+                status: OutcomeStatus.Ok,
+                durationMs: 0
             };
 
             scenarioOutcome.stepOutcomes.push(stepOutcome);
@@ -76,9 +79,11 @@ export async function executeFeature(feature: IFeature) {
 
             const { timeoutMS } = step.definition.options;
             try {
-                await runWithTimeout(timeoutMS, async () => {
-                    await step.definition.cb.apply(context, variables);
-                }, `Timeout after ${timeoutMS} milliseconds.`);
+                stepOutcome.durationMs = await measureMiliseconds(async () => {
+                    await runWithTimeout(timeoutMS, async () => {
+                        await step.definition.cb.apply(context, variables);
+                    }, `Timeout after ${timeoutMS} milliseconds.`);
+                });
             } catch (ex) {
                 featureOutcome.status = scenarioOutcome.status = stepOutcome.status = OutcomeStatus.Error;
                 featureOutcome.error = stepOutcome.error = ex;
@@ -86,7 +91,8 @@ export async function executeFeature(feature: IFeature) {
                 /** Skip remaining steps */
                 stepList.slice(j + 1).forEach(e => scenarioOutcome.stepOutcomes.push({
                     status: OutcomeStatus.Skipped,
-                    step: e
+                    step: e,
+                    durationMs: 0
                 }));
 
                 break;

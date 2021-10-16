@@ -46,7 +46,7 @@ export class Log {
 
         this._logHistory.push({ severity, timeStamp, message });
 
-        console.log(`${timeStamp.toISOString()}: ${message}`);
+        console.log(message);
     }
 
     static color(color: LogColor, text: string) {

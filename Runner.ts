@@ -12,6 +12,7 @@ import { Log } from "./Utils/Log";
 interface IOptions {
     path: string;
     featureName: string;
+    headless?: boolean;
 }
 
 function parseArgs(): IOptions {
@@ -26,6 +27,7 @@ function parseArgs(): IOptions {
                 throw new Error(`[Arg '${arg}'] Expected path.`);
 
             options.path = nextArg;
+            continue;
         }
 
         // Is last argument
