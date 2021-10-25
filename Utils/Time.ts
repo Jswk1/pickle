@@ -10,7 +10,6 @@ export async function measureMiliseconds(fn: () => Promise<any>) {
     return Math.round(finishTime - startTime);
 }
 
-// TODO: remove copypasta
 export function logDuration(durationMs: number) {
     if (durationMs === 0)
         return "0ms";
@@ -18,34 +17,23 @@ export function logDuration(durationMs: number) {
     const logParts: string[] = [];
     const finalizeFn = () => logParts.join(" ");
 
-    const hours = Math.floor(durationMs / 3600000);
-    durationMs -= hours * 3600000;
+    const dateParts = [
+        { suffix: "h", multiplier: 3600000 },
+        { suffix: "m", multiplier: 60000 },
+        { suffix: "s", multiplier: 1000 },
+        { suffix: "ms", multiplier: 1 }
+    ]
 
-    if (hours > 0)
-        logParts.push(`${hours}h`);
+    for (const part of dateParts) {
+        const count = Math.floor(durationMs / part.multiplier);
+        durationMs -= count * part.multiplier;
 
-    if (durationMs === 0)
-        return finalizeFn();
+        if (count > 0)
+            logParts.push(count + part.suffix);
 
-    const minutes = Math.floor(durationMs / 60000);
-    durationMs -= minutes * 60000;
-
-    if (minutes > 0)
-        logParts.push(`${minutes}m`);
-
-    if (durationMs === 0)
-        return finalizeFn();
-
-    const seconds = Math.floor(durationMs / 1000);
-    durationMs -= seconds * 1000;
-
-    if (seconds > 0)
-        logParts.push(`${seconds}s`);
-
-    if (durationMs === 0)
-        return finalizeFn();
-
-    logParts.push(`${durationMs}ms`);
+        if (durationMs === 0)
+            return finalizeFn();
+    }
 
     return finalizeFn();
 }
