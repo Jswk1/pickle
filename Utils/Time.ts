@@ -16,17 +16,16 @@ export function logDuration(durationMs: number) {
 
     const logParts: string[] = [];
     const finalizeFn = () => logParts.join(" ");
-
     const dateParts = [
-        { suffix: "h", multiplier: 3600000 },
-        { suffix: "m", multiplier: 60000 },
-        { suffix: "s", multiplier: 1000 },
-        { suffix: "ms", multiplier: 1 }
+        { suffix: "h", msMultiplier: 3600000 },
+        { suffix: "m", msMultiplier: 60000 },
+        { suffix: "s", msMultiplier: 1000 },
+        { suffix: "ms", msMultiplier: 1 }
     ]
 
     for (const part of dateParts) {
-        const count = Math.floor(durationMs / part.multiplier);
-        durationMs -= count * part.multiplier;
+        const count = Math.floor(durationMs / part.msMultiplier);
+        durationMs -= count * part.msMultiplier;
 
         if (count > 0)
             logParts.push(count + part.suffix);
