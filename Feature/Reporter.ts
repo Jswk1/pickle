@@ -1,4 +1,5 @@
 import { Log, LogColor } from "../Utils/Log";
+import { logDuration } from "../Utils/Time";
 import { IFeatureOutcome, OutcomeStatus } from "./Executor";
 
 function statusToSymbol(status: OutcomeStatus) {
@@ -12,32 +13,6 @@ function statusToSymbol(status: OutcomeStatus) {
         case OutcomeStatus.Skipped:
             return Log.color(LogColor.FgYellow, "?");
     }
-}
-
-function logDuration(durationMs: number) {
-    const hours = Math.floor(durationMs / 3600000);
-    durationMs -= hours * 3600000;
-
-    const minutes = Math.floor(durationMs / 60000);
-    durationMs -= minutes * 60000;
-
-    const seconds = Math.floor(durationMs / 1000);
-    durationMs -= seconds * 1000;
-
-    const logParts: string[] = [];
-
-    if (hours > 0)
-        logParts.push(`${hours}h`);
-
-    if (minutes > 0)
-        logParts.push(`${minutes}m`);
-
-    if (seconds > 0)
-        logParts.push(`${seconds}s`);
-
-    logParts.push(`${durationMs}ms`);
-
-    return logParts.join(" ");
 }
 
 export async function reportFeature(featureOutcome: IFeatureOutcome) {
