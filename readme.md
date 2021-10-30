@@ -88,13 +88,13 @@ defineStep("Checkbox state is set to {bool}.", async function (state: boolean) {
 
 Command line usage:
 ```
-pickle [-r, --require <glob_expr>] <feature_path>
+pickle [-r, --require <glob_expr>, -j, --junit <xml_path>] <feature_path>
 ```
 
 Example:
 
 ```
-pickle -r ./Flows/**/*.js ./test.feature
+pickle -r ./Flows/**/*.js -j ./junit.xml ./test.feature
 ```
 
 # Not supported yet
