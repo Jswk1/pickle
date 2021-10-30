@@ -6,17 +6,18 @@ import "./Step/Expression";
 import { executeFeature, OutcomeStatus } from "./Feature/Executor";
 import { loadFeature } from "./Feature/Loader";
 import { queryFiles } from "./Utils/QueryFiles";
-import { reportFeature } from "./Feature/Reporter";
 import { Log } from "./Utils/Log";
+import { ReporterType, reportFeature } from "./Feature/Reporter/Factory";
 
-interface IOptions {
+export interface IRunnerOptions {
     path: string;
     featureName: string;
     headless?: boolean;
+    jUnitXmlOutputPath?: string;
 }
 
-function parseArgs(): IOptions {
-    const options: IOptions = { path: null, featureName: null };
+function parseArgs(): IRunnerOptions {
+    const options: IRunnerOptions = { path: null, featureName: null };
 
     for (let i = 0; i < argv.length; i++) {
         const arg = argv[i];
@@ -27,6 +28,14 @@ function parseArgs(): IOptions {
                 throw new Error(`[Arg '${arg}'] Expected path.`);
 
             options.path = nextArg;
+            continue;
+        }
+
+        if (["-j", "--junit"].some(e => e === arg)) {
+            if (!nextArg?.length)
+                throw new Error(`[Arg '${arg}'] Expected output xml path.`);
+
+            options.jUnitXmlOutputPath = nextArg;
             continue;
         }
 
@@ -65,7 +74,10 @@ export default async function execute() {
         const featureOutcome = await executeFeature(feature);
 
         /** Report results */
-        await reportFeature(featureOutcome);
+        await reportFeature(ReporterType.Stdout, featureOutcome, options);
+
+        if (options.jUnitXmlOutputPath)
+            await reportFeature(ReporterType.JUnit, featureOutcome, options);
 
         process.exit(featureOutcome.status === OutcomeStatus.Ok ? 0 : 1);
     } catch (ex) {

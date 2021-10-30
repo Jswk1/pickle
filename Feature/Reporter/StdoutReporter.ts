@@ -1,6 +1,6 @@
-import { Log, LogColor } from "../Utils/Log";
-import { logDuration } from "../Utils/Time";
-import { IFeatureOutcome, OutcomeStatus } from "./Executor";
+import { Log, LogColor } from "../../Utils/Log";
+import { logDuration } from "../../Utils/Time";
+import { IFeatureOutcome, OutcomeStatus } from "../Executor";
 
 function statusToSymbol(status: OutcomeStatus) {
     switch (status) {
@@ -15,7 +15,7 @@ function statusToSymbol(status: OutcomeStatus) {
     }
 }
 
-export async function reportFeature(featureOutcome: IFeatureOutcome) {
+export async function reportFeatureToStdout(featureOutcome: IFeatureOutcome) {
     console.log();
     Log.info(Log.color(LogColor.FgWhite, `=====${"=".repeat(featureOutcome.feature.name.length)}=====`));
     Log.info(Log.color(LogColor.FgWhite, `=====${Log.color(LogColor.FgYellow, featureOutcome.feature.name)}=====`));

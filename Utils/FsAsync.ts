@@ -42,6 +42,17 @@ export class FsAsync {
         });
     }
 
+    static async writeFile(path: string, data: string | Buffer, encoding: BufferEncoding = "utf-8") {
+        return new Promise<void>((resolve, reject) => {
+            Fs.writeFile(path, data, { encoding }, (err) => {
+                if (err)
+                    reject(err);
+
+                resolve();
+            });
+        });
+    }
+
     static async deepReaddir(path: string) {
         const temp: string[] = [];
 

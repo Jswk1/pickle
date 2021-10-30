@@ -22,6 +22,22 @@ export function jsonToXML(input: ISerializabjeJsonNode, encoding: "UTF-8" = "UTF
     return xmlLines.join("");
 }
 
+/**
+ * Converts 'Some string with "quotation".' to 'Some string with &quot;quotation&quot;.'
+ */
+export function encodeXmlString(xmlString: string) {
+    return xmlString
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&apos;");
+}
+
+export function stubify(text: string) {
+    return encodeXmlString(text.toLowerCase().replace(/\s/g, "-"));
+}
+
 function nodeToXmlString(node: ISerializabjeJsonNode) {
     const xmlLines: string[] = [];
     const attributesString = nodeAttributesToString(node.attributes);
