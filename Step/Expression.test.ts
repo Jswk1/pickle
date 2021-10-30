@@ -1,29 +1,29 @@
 import { expect } from "chai";
-import { stepConvertExpressions, extractVariables } from "./Expression";
+import { expressionFromString, extractVariables } from "./Expression";
 import { defineStep, stepDefinitions } from "./Step";
 
 describe("Step Expression Tests", () => {
-    describe("stepConvertExpressions", () => {
+    describe("expressionFromString", () => {
         it("should convert steps without custom expressions", () => {
-            const out1 = stepConvertExpressions("When This test is ran.");
+            const out1 = expressionFromString("When This test is ran.");
             expect(out1.regexp.toString()).to.be.equal("/When This test is ran\\./");
             expect(out1.parsers).to.be.empty;
 
-            const out2 = stepConvertExpressions("Then This test will be [green?]");
+            const out2 = expressionFromString("Then This test will be [green?]");
             expect(out2.regexp.toString()).to.be.equal("/Then This test will be \\[green\\?\\]/");
             expect(out2.parsers).to.be.empty;
         });
 
         it("should convert steps with custom expressions", () => {
-            const out1 = stepConvertExpressions("When This test is ran for the {int} time.");
+            const out1 = expressionFromString("When This test is ran for the {int} time.");
             expect(out1.regexp.toString()).to.be.equal("/When This test is ran for the (\\\-?\\\d*) time\\./");
             expect(out1.parsers.length).to.be.equal(1);
 
-            const out2 = stepConvertExpressions("Then The result of this test will be {string}.");
+            const out2 = expressionFromString("Then The result of this test will be {string}.");
             expect(out2.regexp.toString()).to.be.equal("/Then The result of this test will be (?:\\\"(.*)\\\")\\./");
             expect(out2.parsers.length).to.be.equal(1);
 
-            const out3 = stepConvertExpressions("Step {int} with {decimal} many {string} expressions.");
+            const out3 = expressionFromString("Step {int} with {decimal} many {string} expressions.");
             expect(out3.regexp.toString()).to.be.equal("/Step (\\\-?\\\d*) with (\\\-?\\\d*\\\.?\\\d*) many (?:\\\"(.*)\\\") expressions\\./");
             expect(out3.parsers.length).to.be.equal(3);
         });
@@ -60,6 +60,14 @@ describe("Step Expression Tests", () => {
             const definition1 = stepDefinitions.get(description1);
 
             expect(extractVariables({ name: `Step with integer 1234 and decimal -6.4 with string "lol" included.`, definition: definition1 })).to.eql([1234, -6.4, "lol"]);
+        });
+
+        it("should should extract capturing groups from regexp", () => {
+            const description1 = /This step has uses ([a-z]+) to extract variables\. It is working ([A-Z]+) and it should find (\d) groups\!/;
+            defineStep(description1, () => undefined);
+            const definition1 = stepDefinitions.get(description1);
+
+            expect(extractVariables({ name: `This step has uses regexp to extract variables. It is working CORRECTLY and it should find 2 groups!`, definition: definition1 })).to.eql(["regexp", "CORRECTLY", "2"]);
         });
     });
 });
