@@ -99,4 +99,3 @@ pickle -r ./Flows/**/*.js -j ./junit.xml ./test.feature
 
 # Not supported yet
 * Data tables in features
-* Test result in JUnit XML format
