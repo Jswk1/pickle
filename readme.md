@@ -38,6 +38,15 @@ defineStep("It should open a display message {string}.", async function (message
 
     this.variables["message"] = message; // Transfer variables between steps
 });
+
+defineStep(/It can also use regexes\. Look what I found\: ([a-z]+)\./, async function (message: string) {
+    /**
+     * For 'It can also use regexes. Look what I found: test.'
+     * message will be 'test'
+     */
+
+    this.variables["message"] = message; // Transfer variables between steps
+});
 ```
 
 #### Default variable types
@@ -89,5 +98,5 @@ pickle -r ./Flows/**/*.js ./test.feature
 ```
 
 # Not supported yet
-* Custom regex in step name
 * Data tables in features
+* Test result in JUnit XML format
