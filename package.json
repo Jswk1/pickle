@@ -1,9 +1,11 @@
 {
-  "name": "pickle",
+  "name": "pickle-runner",
   "version": "1.0.0",
   "description": "",
   "main": "Runner.js",
+  "types": "Runner.d.ts",
   "scripts": {
+    "prepublish": "tsc",
     "test": "mocha './{,!(node_modules)/**/}*.test.js' --recursive --reporter spec"
   },
   "repository": {

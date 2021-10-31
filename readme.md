@@ -1,4 +1,7 @@
 
+# About
+
+Simpler, dependency free version of CucumberJS library. 
 
 # API
 
@@ -82,7 +85,6 @@ defineStep("Checkbox state is set to {bool}.", async function (state: boolean) {
      */
 });
 ```
-
 
 # CLI
 
