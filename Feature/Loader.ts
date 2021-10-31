@@ -99,7 +99,7 @@ export async function loadFeature(featurePath: string) {
                     const scenarioStepDef = findStepDefinition(stepName);
                     const lastScenario = getLastScenario();
 
-                    lastScenario.steps.push({ name: stepName, definition: scenarioStepDef });
+                    lastScenario.steps.push({ name: stepMatch[0], definition: scenarioStepDef });
                     break;
                 default:
                     throw new Error("Unexpected scope: " + currentScope);

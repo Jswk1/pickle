@@ -5,44 +5,68 @@ import { IFeatureOutcome, OutcomeStatus } from "../Executor";
 function statusToSymbol(status: OutcomeStatus) {
     switch (status) {
         case OutcomeStatus.Ok:
-            return Log.color(LogColor.FgGreen, "✔");
+            return "✔";
         case OutcomeStatus.Warning:
-            return Log.color(LogColor.FgYellow, "⚠");
+            return "⚠";
         case OutcomeStatus.Error:
-            return Log.color(LogColor.FgRed, "✘");
+            return "✘";
         case OutcomeStatus.Skipped:
-            return Log.color(LogColor.FgYellow, "?");
+            return "?";
+    }
+}
+
+function statusToColor(status: OutcomeStatus) {
+    switch (status) {
+        case OutcomeStatus.Ok:
+            return LogColor.FgGreen;
+        case OutcomeStatus.Warning:
+            return LogColor.FgYellow;
+        case OutcomeStatus.Error:
+            return LogColor.FgRed;
+        case OutcomeStatus.Skipped:
+            return LogColor.FgYellow;
     }
 }
 
 export async function reportFeatureToStdout(featureOutcome: IFeatureOutcome) {
     console.log();
-    Log.info(Log.color(LogColor.FgWhite, `=====${"=".repeat(featureOutcome.feature.name.length)}=====`));
-    Log.info(Log.color(LogColor.FgWhite, `=====${Log.color(LogColor.FgYellow, featureOutcome.feature.name)}=====`));
-    Log.info(Log.color(LogColor.FgWhite, `=====${"=".repeat(featureOutcome.feature.name.length)}=====`));
+
+    Log.info("Feature: " + featureOutcome.feature.name);
 
     let count: { [key: number]: number } = { [OutcomeStatus.Ok]: 0, [OutcomeStatus.Error]: 0, [OutcomeStatus.Warning]: 0, [OutcomeStatus.Skipped]: 0 };
     let totalDurationMs = 0;
-    for (const scenarioOutcome of featureOutcome.scenarioOutcomes) {
-        Log.info(`  ${statusToSymbol(scenarioOutcome.status)}  ${Log.color(LogColor.FgMagenta, scenarioOutcome.scenario.name)}`);
+    for (let i = 0; i < featureOutcome.scenarioOutcomes.length; i++) {
+        const scenarioOutcome = featureOutcome.scenarioOutcomes[i];
 
-        for (const stepOutcome of scenarioOutcome.stepOutcomes) {
+        const isLastScenario = i === featureOutcome.scenarioOutcomes.length - 1;
+        const scenarioSymbol = isLastScenario ? "└" : "├";
+        const scenarioColor = statusToColor(scenarioOutcome.status);
+
+        Log.info("│")
+        Log.info(scenarioSymbol + "─ " + Log.color(scenarioColor, statusToSymbol(scenarioOutcome.status) + " Scenario: " + scenarioOutcome.scenario.name));
+
+        for (let j = 0; j < scenarioOutcome.stepOutcomes.length; j++) {
+            const stepOutcome = scenarioOutcome.stepOutcomes[j];
+            const stepColor = statusToColor(stepOutcome.status);
+            const isLast = j === scenarioOutcome.stepOutcomes.length - 1;
+            const symbol = isLast ? "└" : "├";
+            const featureSymbol = isLastScenario ? " " : "│";
+
             totalDurationMs += stepOutcome.durationMs;
             count[stepOutcome.status]++;
-            Log.info(`    ${statusToSymbol(stepOutcome.status)}  ${stepOutcome.step.name}  ${Log.color(LogColor.FgYellow, logDuration(stepOutcome.durationMs))}`);
+
+            Log.info(featureSymbol + "  " + Log.color(stepColor, symbol + "─ " + statusToSymbol(stepOutcome.status) + " " + stepOutcome.step.name) + " " + Log.color(LogColor.Reset, logDuration(stepOutcome.durationMs)));
+
             if (stepOutcome.status === OutcomeStatus.Error) {
                 for (const stack of stepOutcome.error.stack.split("\n"))
-                    Log.error(`        ${stack}`);
+                    Log.info(featureSymbol + "  " + Log.color(LogColor.FgRed, "│ " + stack));
             }
-
         }
     }
 
     const total = Object.values(count).reduce((p, c) => p + c, 0);
     const percentage = count[OutcomeStatus.Ok] * 100 / total;
     const resultString = `Passed steps: ${count[OutcomeStatus.Ok]}/${total} (${Math.round(percentage)}%) ${Log.color(LogColor.FgYellow, logDuration(totalDurationMs))}`;
-    Log.info("_".repeat(resultString.length));
+    Log.info(Log.color(LogColor.Underscore, "_".repeat(resultString.length)));
     Log.info(resultString);
-
-    console.log("\n\n");
 }

@@ -69,6 +69,8 @@ export default async function execute() {
             require(fullPath);
         }
 
+        Log.info(`${stepDefinitionFiles.length} files loaded.`);
+
         const featureFileFullPath = Path.join(executionDirectory, options.featureName);
         const feature = await loadFeature(featureFileFullPath);
         const featureOutcome = await executeFeature(feature);
