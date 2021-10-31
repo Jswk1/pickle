@@ -1,5 +1,5 @@
 {
-  "name": "pickle",
+  "name": "pickle-runner",
   "version": "1.0.0",
   "description": "",
   "main": "dist/Runner.js",

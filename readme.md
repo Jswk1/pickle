@@ -1,4 +1,7 @@
 
+# About
+
+Simpler version of CucumberJS library. 
 
 # API
 
