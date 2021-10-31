@@ -15,6 +15,7 @@ export interface IFeature {
 
 const gherkinSectionExpr = /^([A-Za-z]+)\:\s{0,}(.*)(?:\r\n)?$/;
 const gherkinStepExpr = /^(?:given|when|then|and)(.*)$/i;
+const gherkinCommentExpr = /^\#(?:.*)$/;
 
 enum GherkinScope {
     Feature = 0,
@@ -57,6 +58,9 @@ export async function loadFeature(featurePath: string) {
 
         if (step === "")
             continue;
+
+        if (gherkinCommentExpr.exec(step))
+            continue; // skip comments
 
         const sectionMatch = gherkinSectionExpr.exec(step);
         if (sectionMatch) {
