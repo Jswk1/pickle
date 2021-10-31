@@ -10,15 +10,15 @@ import { Log } from "./Utils/Log";
 import { ReporterType, reportFeature } from "./Feature/Reporter/Factory";
 
 export interface IRunnerOptions {
-    path: string;
-    featureName: string;
+    scriptsPath: string;
+    featurePath: string;
     headless?: boolean;
     jUnitXmlOutputPath?: string;
     logOutputPath?: string;
 }
 
 function parseArgs(): IRunnerOptions {
-    const options: IRunnerOptions = { path: null, featureName: null };
+    const options: IRunnerOptions = { scriptsPath: null, featurePath: null };
 
     for (let i = 0; i < argv.length; i++) {
         const arg = argv[i];
@@ -28,7 +28,7 @@ function parseArgs(): IRunnerOptions {
             if (!nextArg?.length)
                 throw new Error(`[Arg '${arg}'] Expected path.`);
 
-            options.path = nextArg;
+            options.scriptsPath = nextArg;
             continue;
         }
 
@@ -53,45 +53,46 @@ function parseArgs(): IRunnerOptions {
             if (!arg.endsWith(".feature"))
                 throw new Error("Expected feature name.");
 
-            options.featureName = arg;
+            options.featurePath = arg;
         }
     }
 
-    if (!options.path)
+    if (!options.scriptsPath)
         throw new Error("Path to step definitions is required. (-r, --require <path> parameter)");
 
-    if (!options.featureName)
+    if (!options.featurePath)
         throw new Error("Feature name is required. (last parameter)");
 
     return options;
 }
 
-export default async function execute() {
+export default async function execute(options?: IRunnerOptions) {
     try {
-        const options = parseArgs();
+        const runnerOptions = options || parseArgs();
 
-        const stepDefinitionFiles = await queryFiles(options.path);
+        const stepDefinitionFiles = await queryFiles(runnerOptions.scriptsPath);
         const executionDirectory = process.cwd();
 
+
         for (const file of stepDefinitionFiles) {
-            const fullPath = Path.join(executionDirectory, file);
+            const fullPath = Path.isAbsolute(file) ? file : Path.join(executionDirectory, file);
             require(fullPath);
         }
 
         Log.info(`${stepDefinitionFiles.length} files loaded.`);
 
-        const featureFileFullPath = Path.join(executionDirectory, options.featureName);
+        const featureFileFullPath = Path.isAbsolute(runnerOptions.featurePath) ? runnerOptions.featurePath : Path.join(executionDirectory, runnerOptions.featurePath);
         const feature = await loadFeature(featureFileFullPath);
         const featureOutcome = await executeFeature(feature);
 
         /** Report results */
-        await reportFeature(ReporterType.Stdout, featureOutcome, options);
+        await reportFeature(ReporterType.Stdout, featureOutcome, runnerOptions);
 
-        if (options.jUnitXmlOutputPath)
-            await reportFeature(ReporterType.JUnit, featureOutcome, options);
+        if (runnerOptions.jUnitXmlOutputPath)
+            await reportFeature(ReporterType.JUnit, featureOutcome, runnerOptions);
 
-        if (options.logOutputPath)
-            await Log.save(options.logOutputPath);
+        if (runnerOptions.logOutputPath)
+            await Log.save(runnerOptions.logOutputPath);
 
         process.exit(featureOutcome.status === OutcomeStatus.Ok ? 0 : 1);
     } catch (ex) {
@@ -100,5 +101,6 @@ export default async function execute() {
     }
 }
 
+export { execute };
 export { defineStep } from "./Step/Step";
 export { defineExpression } from "./Step/Expression";

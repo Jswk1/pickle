@@ -70,9 +70,15 @@ export async function executeFeature(feature: IFeature) {
             scenarioOutcome.stepOutcomes.push(stepOutcome);
 
             const variables = extractVariables(step);
-            process.stdout.clearLine(undefined);
-            process.stdout.cursorTo(0);
-            process.stdout.write("Executing - Scenario: " + scenario.name + ` Step (${j + 1}/${stepList.length - 1}): ` + step.name);
+
+            /**
+             * Check if execuced from command line. It will not work in debugger.
+             */
+            if (typeof process.stdout.clearLine === "function") {
+                process.stdout.clearLine(undefined);
+                process.stdout.cursorTo(0);
+                process.stdout.write("Executing - Scenario: " + scenario.name + ` Step (${j + 1}/${stepList.length - 1}): ` + step.name);
+            }
 
             const { timeoutMS } = step.definition.options;
             try {

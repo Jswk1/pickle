@@ -1,4 +1,5 @@
 import { FsAsync } from "./FsAsync";
+import * as Path from "path";
 
 export function createRegexFromPattern(globPattern: string) {
     let regexpString = "^";
@@ -70,10 +71,13 @@ export function extractEntryDirectory(globPattern: string) {
     return finalPath;
 }
 
-export async function queryFiles(globPattern: string) {
-    const entryPoint = extractEntryDirectory(globPattern);
-    const regexp = createRegexFromPattern(globPattern);
+function toPosix(path: string) {
+    return path.split(Path.sep).join(Path.posix.sep);
+}
 
+export async function queryFiles(path: string) {
+    const entryPoint = Path.isAbsolute(path) ? path : extractEntryDirectory(path);
+    const regexp = createRegexFromPattern(toPosix(Path.join(path, "**/*.js")));
     const allFilePaths = await FsAsync.deepReaddir(entryPoint);
     const filteredFilePaths = allFilePaths.filter(e => regexp.test(e));
 
