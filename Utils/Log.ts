@@ -86,6 +86,6 @@ export class Log {
     }
 
     static async save(path: string) {
-        await FsAsync.writeFile(Path.normalize(path), clearColor(this._logHistory.map(e => e.message).join("\n")));
+        await FsAsync.writeFile(Path.normalize(path), clearColor(this._logHistory.map(e => `${e.timeStamp.toISOString()}: ${e.message}`).join("\n")));
     }
 }
