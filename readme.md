@@ -1,7 +1,7 @@
 
 # About
 
-Simpler version of CucumberJS library. 
+Simpler, dependency free version of CucumberJS library. 
 
 # API
 
