@@ -88,14 +88,27 @@ defineStep("Checkbox state is set to {bool}.", async function (state: boolean) {
 
 Command line usage:
 ```
-pickle [-r, --require <glob_expr>, -j, --junit <xml_path>] <feature_path>
+pickle [(-r, --require <glob_expr>), (-j, --junit <xml_path>), (-o, --output <log_path>)] <feature_path>
 ```
 
-Example:
+Examples:
 
+#### Run only
 ```
-pickle -r ./Flows/**/*.js -j ./junit.xml ./test.feature
+pickle -r ./Flows/**/*.js ./test.feature
 ```
+
+#### Run + generate junit xml + generate log file
+```
+pickle -r ./Flows/**/*.js -j ./junit.xml -o ./Output.log ./test.feature
+```
+
+#### Same as above but more verbose
+```
+pickle --require ./Flows/**/*.js --junit ./junit.xml --output ./Output.log ./test.feature
+```
+
+
 
 # Not supported yet
 * Data tables in features
