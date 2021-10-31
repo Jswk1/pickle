@@ -41,6 +41,7 @@ export async function reportFeatureToStdout(featureOutcome: IFeatureOutcome) {
         const isLastScenario = i === featureOutcome.scenarioOutcomes.length - 1;
         const scenarioSymbol = isLastScenario ? "└" : "├";
         const scenarioColor = statusToColor(scenarioOutcome.status);
+        const featureSymbol = isLastScenario ? " " : "│";
 
         Log.info("│")
         Log.info(scenarioSymbol + "─ " + Log.color(scenarioColor, statusToSymbol(scenarioOutcome.status) + " Scenario: " + scenarioOutcome.scenario.name));
@@ -48,14 +49,13 @@ export async function reportFeatureToStdout(featureOutcome: IFeatureOutcome) {
         for (let j = 0; j < scenarioOutcome.stepOutcomes.length; j++) {
             const stepOutcome = scenarioOutcome.stepOutcomes[j];
             const stepColor = statusToColor(stepOutcome.status);
-            const isLast = j === scenarioOutcome.stepOutcomes.length - 1;
-            const symbol = isLast ? "└" : "├";
-            const featureSymbol = isLastScenario ? " " : "│";
+            const isLastStep = j === scenarioOutcome.stepOutcomes.length - 1;
+            const stepSymbol = isLastStep ? "└" : "├";
 
             totalDurationMs += stepOutcome.durationMs;
             count[stepOutcome.status]++;
 
-            Log.info(featureSymbol + "  " + Log.color(stepColor, symbol + "─ " + statusToSymbol(stepOutcome.status) + " " + stepOutcome.step.name) + " " + Log.color(LogColor.Reset, logDuration(stepOutcome.durationMs)));
+            Log.info(featureSymbol + "  " + Log.color(stepColor, stepSymbol + "─ " + statusToSymbol(stepOutcome.status) + " " + stepOutcome.step.name) + " " + Log.color(LogColor.Reset, logDuration(stepOutcome.durationMs)));
 
             if (stepOutcome.status === OutcomeStatus.Error) {
                 for (const stack of stepOutcome.error.stack.split("\n"))
@@ -66,7 +66,7 @@ export async function reportFeatureToStdout(featureOutcome: IFeatureOutcome) {
 
     const total = Object.values(count).reduce((p, c) => p + c, 0);
     const percentage = count[OutcomeStatus.Ok] * 100 / total;
-    const resultString = `Passed steps: ${count[OutcomeStatus.Ok]}/${total} (${Math.round(percentage)}%) ${Log.color(LogColor.FgYellow, logDuration(totalDurationMs))}`;
+    const resultString = `Test result: ${count[OutcomeStatus.Ok]}/${total} (${Math.round(percentage)}%) ${logDuration(totalDurationMs)}`;
     Log.info(Log.color(LogColor.Underscore, "_".repeat(resultString.length)));
     Log.info(resultString);
 }

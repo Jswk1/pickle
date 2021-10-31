@@ -47,10 +47,6 @@ export async function executeFeature(feature: IFeature) {
         scenarioOutcomes: []
     }
 
-    Log.debug(`=================================`);
-    Log.debug(`Feature: ${feature.name}`);
-    Log.debug(`=================================`);
-
     for (let i = 0; i < feature.scenarios.length; i++) {
         const scenario = feature.scenarios[i];
         const scenarioOutcome: IScenarioOutcome = {
@@ -61,7 +57,6 @@ export async function executeFeature(feature: IFeature) {
 
         featureOutcome.scenarioOutcomes.push(scenarioOutcome);
 
-        Log.debug(`  - Scenario: ${scenario.name}`);
         const stepList: IStep[] = [...feature.backgroundSteps, ...scenario.steps];
 
         for (let j = 0; j < stepList.length; j++) {
@@ -75,7 +70,9 @@ export async function executeFeature(feature: IFeature) {
             scenarioOutcome.stepOutcomes.push(stepOutcome);
 
             const variables = extractVariables(step);
-            Log.debug(`     - Step: ${step.name}`);
+            process.stdout.clearLine(undefined);
+            process.stdout.cursorTo(0);
+            process.stdout.write("Executing - Scenario: " + scenario.name + ` Step (${j + 1}/${stepList.length - 1}): ` + step.name);
 
             const { timeoutMS } = step.definition.options;
             try {
