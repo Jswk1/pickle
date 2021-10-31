@@ -83,7 +83,6 @@ defineStep("Checkbox state is set to {bool}.", async function (state: boolean) {
 });
 ```
 
-
 # CLI
 
 Command line usage:

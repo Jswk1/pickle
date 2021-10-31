@@ -2,8 +2,10 @@
   "name": "pickle",
   "version": "1.0.0",
   "description": "",
-  "main": "Runner.js",
+  "main": "dist/Runner.js",
+  "types": "dist/Runner.d.ts",
   "scripts": {
+    "prepublish": "tsc",
     "test": "mocha './{,!(node_modules)/**/}*.test.js' --recursive --reporter spec"
   },
   "repository": {

@@ -10,10 +10,11 @@
         "strictFunctionTypes": true,
         "keyofStringsOnly": true,
         "incremental": true,
-        "allowSyntheticDefaultImports": true
+        "allowSyntheticDefaultImports": true,
+        "outDir": "./dist"
     },
     "exclude": [
         "node_modules",
-        "typings"
+        "dist"
     ]
 }
