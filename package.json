@@ -2,8 +2,8 @@
   "name": "pickle-runner",
   "version": "1.0.0",
   "description": "",
-  "main": "dist/Runner.js",
-  "types": "dist/Runner.d.ts",
+  "main": "Runner.js",
+  "types": "Runner.d.ts",
   "scripts": {
     "prepublish": "tsc",
     "test": "mocha './{,!(node_modules)/**/}*.test.js' --recursive --reporter spec"
