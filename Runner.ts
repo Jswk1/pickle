@@ -14,6 +14,7 @@ export interface IRunnerOptions {
     featureName: string;
     headless?: boolean;
     jUnitXmlOutputPath?: string;
+    logOutputPath?: string;
 }
 
 function parseArgs(): IRunnerOptions {
@@ -36,6 +37,14 @@ function parseArgs(): IRunnerOptions {
                 throw new Error(`[Arg '${arg}'] Expected output xml path.`);
 
             options.jUnitXmlOutputPath = nextArg;
+            continue;
+        }
+
+        if (["-o", "--output"].some(e => e === arg)) {
+            if (!nextArg?.length)
+                throw new Error(`[Arg '${arg}'] Expected output log path.`);
+
+            options.logOutputPath = nextArg;
             continue;
         }
 
@@ -80,6 +89,9 @@ export default async function execute() {
 
         if (options.jUnitXmlOutputPath)
             await reportFeature(ReporterType.JUnit, featureOutcome, options);
+
+        if (options.logOutputPath)
+            await Log.save(options.logOutputPath);
 
         process.exit(featureOutcome.status === OutcomeStatus.Ok ? 0 : 1);
     } catch (ex) {

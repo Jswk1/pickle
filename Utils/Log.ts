@@ -1,3 +1,5 @@
+import { FsAsync } from "./FsAsync";
+import * as Path from "path";
 
 export enum LogSeverity {
     Error = 1,
@@ -34,6 +36,12 @@ export enum LogColor {
     BgMagenta = "\x1b[45m",
     BgCyan = "\x1b[46m",
     BgWhite = "\x1b[47m"
+}
+
+function clearColor(text: string) {
+    text = text.replace(/\x1b\[[0-9]+m/g, "");
+
+    return text;
 }
 
 export class Log {
@@ -77,4 +85,7 @@ export class Log {
         }
     }
 
+    static async save(path: string) {
+        await FsAsync.writeFile(Path.normalize(path), clearColor(this._logHistory.map(e => e.message).join("\n")));
+    }
 }
