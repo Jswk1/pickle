@@ -1,4 +1,4 @@
-import { IStepExpression, expressionFromString, stepExpressionFactory } from "./Expression";
+import { IStepExpression, stepExpressionFactory } from "./Expression";
 
 type TContext = {
     variables: {

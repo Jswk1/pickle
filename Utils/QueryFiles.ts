@@ -77,7 +77,7 @@ function toPosix(path: string) {
 
 export async function queryFiles(path: string) {
     const entryPoint = Path.isAbsolute(path) ? path : extractEntryDirectory(path);
-    const regexp = createRegexFromPattern(toPosix(Path.join(path, "**/*.js")));
+    const regexp = createRegexFromPattern(toPosix(path));
     const allFilePaths = await FsAsync.deepReaddir(entryPoint);
     const filteredFilePaths = allFilePaths.filter(e => regexp.test(e));
 

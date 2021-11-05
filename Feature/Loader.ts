@@ -83,7 +83,12 @@ export async function loadFeature(featurePath: string) {
                     throw new Error("Unexpected line in feature scope.");
 
                 case GherkinScope.Background:
-                    const backgroundStepDef = findStepDefinition(step);
+                    const backgroundStepMatch = gherkinStepExpr.exec(step);
+                    if (!backgroundStepMatch)
+                        throw new Error("Incorrect step format: " + step);
+
+                    const backgroundStepName = backgroundStepMatch[1].trim();
+                    const backgroundStepDef = findStepDefinition(backgroundStepName);
 
                     const lastFeature = getLastFeature();
                     lastFeature.backgroundSteps.push({ name: step, definition: backgroundStepDef });
@@ -99,7 +104,7 @@ export async function loadFeature(featurePath: string) {
                     const scenarioStepDef = findStepDefinition(stepName);
                     const lastScenario = getLastScenario();
 
-                    lastScenario.steps.push({ name: stepMatch[0], definition: scenarioStepDef });
+                    lastScenario.steps.push({ name: step, definition: scenarioStepDef });
                     break;
                 default:
                     throw new Error("Unexpected scope: " + currentScope);

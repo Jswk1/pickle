@@ -5,13 +5,19 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "type": "pwa-node",
+            "type": "node",
             "request": "launch",
             "name": "Launch Program",
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "program": "${workspaceFolder}\\Runner.js",
+            "program": "${workspaceFolder}\\bin\\pickle.js",
+            "sourceMaps": true,
+            "args": [
+                "-r",
+                "../ATF-test/Flows/**/*.js",
+                "../ATF-test/test.feature"
+            ],
             "outFiles": [
                 "${workspaceFolder}/**/*.js"
             ]
