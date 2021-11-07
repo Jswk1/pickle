@@ -1,6 +1,5 @@
 import { extractVariables } from "../Step/Expression";
 import { IStep } from "../Step/Step";
-import { Log } from "../Utils/Log";
 import { measureMiliseconds } from "../Utils/Time";
 import { IScenario, IFeature } from "./Loader";
 
@@ -39,6 +38,30 @@ async function runWithTimeout(timeoutMS: number, runFn: () => Promise<any>, onTi
     });
 }
 
+export async function executeStep(step: IStep, context: { variables: {} }) {
+    const variables = extractVariables(step);
+
+    const stepOutcome: IStepOutcome = {
+        step,
+        status: OutcomeStatus.Ok,
+        durationMs: 0
+    };
+
+    const { timeoutMS } = step.definition.options;
+    try {
+        stepOutcome.durationMs = await measureMiliseconds(async () => {
+            await runWithTimeout(timeoutMS, async () => {
+                await step.definition.cb.apply(context, variables);
+            }, `Timeout after ${timeoutMS} milliseconds.`);
+        });
+    } catch (ex) {
+        stepOutcome.status = OutcomeStatus.Error;
+        stepOutcome.error = ex;
+    } finally {
+        return stepOutcome;
+    }
+}
+
 export async function executeFeature(feature: IFeature) {
     const context = { variables: {} };
     const featureOutcome: IFeatureOutcome = {
@@ -61,15 +84,6 @@ export async function executeFeature(feature: IFeature) {
 
         for (let j = 0; j < stepList.length; j++) {
             const step = stepList[j];
-            const stepOutcome: IStepOutcome = {
-                step,
-                status: OutcomeStatus.Ok,
-                durationMs: 0
-            };
-
-            scenarioOutcome.stepOutcomes.push(stepOutcome);
-
-            const variables = extractVariables(step);
 
             /**
              * Check if execuced from command line. It will not work in debugger.
@@ -80,16 +94,12 @@ export async function executeFeature(feature: IFeature) {
                 process.stdout.write("Executing - Scenario: " + scenario.name + ` Step (${j + 1}/${stepList.length - 1}): ` + step.name);
             }
 
-            const { timeoutMS } = step.definition.options;
-            try {
-                stepOutcome.durationMs = await measureMiliseconds(async () => {
-                    await runWithTimeout(timeoutMS, async () => {
-                        await step.definition.cb.apply(context, variables);
-                    }, `Timeout after ${timeoutMS} milliseconds.`);
-                });
-            } catch (ex) {
-                featureOutcome.status = scenarioOutcome.status = stepOutcome.status = OutcomeStatus.Error;
-                featureOutcome.error = stepOutcome.error = ex;
+            const stepOutcome = await executeStep(step, context);
+            scenarioOutcome.stepOutcomes.push(stepOutcome);
+
+            if (stepOutcome.status === OutcomeStatus.Error) {
+                featureOutcome.status = scenarioOutcome.status = OutcomeStatus.Error;
+                featureOutcome.error = stepOutcome.error;
 
                 /** Skip remaining steps */
                 stepList.slice(j + 1).forEach(e => scenarioOutcome.stepOutcomes.push({

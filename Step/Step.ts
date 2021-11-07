@@ -20,7 +20,14 @@ interface IStepOptions {
     timeoutMS?: number;
 }
 
+export enum StepType {
+    Background = 1,
+    Scenario = 2
+}
+
 export interface IStep {
+    id: number;
+    type: StepType;
     name: string;
     definition: IStepDefinition;
 }

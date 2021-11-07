@@ -16,6 +16,7 @@ export interface IRunnerOptions {
     jUnitXmlOutputPath?: string;
     logOutputPath?: string;
     debug?: boolean;
+    debugPort?: number;
 }
 
 function parseArgs(): IRunnerOptions {
@@ -48,6 +49,9 @@ function parseArgs(): IRunnerOptions {
                 options.logOutputPath = nextArg;
             case "-d":
             case "--debug":
+                if (nextArg && !isNaN(Number(nextArg)))
+                    options.debugPort = Number(nextArg);
+
                 options.debug = true;
                 break;
         }
@@ -89,7 +93,7 @@ export default async function execute(options?: IRunnerOptions) {
         const feature = await loadFeature(featureFileFullPath);
 
         if (runnerOptions.debug) {
-            await startDebugger();
+            startDebugger(runnerOptions.debugPort || 3001, feature);
         } else {
             const featureOutcome = await executeFeature(feature);
 

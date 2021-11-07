@@ -1,4 +1,4 @@
-import { IStep, findStepDefinition, stepDefinitions } from "../Step/Step";
+import { IStep, findStepDefinition, stepDefinitions, StepType } from "../Step/Step";
 import { FsAsync } from "../Utils/FsAsync";
 import { Log } from "../Utils/Log";
 
@@ -37,6 +37,7 @@ function getGherkinScope(text: string) {
 }
 
 export async function loadFeature(featurePath: string) {
+    let id = 1;
     const exists = await FsAsync.exists(featurePath);
 
     if (!exists)
@@ -91,7 +92,7 @@ export async function loadFeature(featurePath: string) {
                     const backgroundStepDef = findStepDefinition(backgroundStepName);
 
                     const lastFeature = getLastFeature();
-                    lastFeature.backgroundSteps.push({ name: step, definition: backgroundStepDef });
+                    lastFeature.backgroundSteps.push({ id: ++id, type: StepType.Background, name: step, definition: backgroundStepDef });
                     break;
 
                 case GherkinScope.Scenario:
@@ -104,7 +105,7 @@ export async function loadFeature(featurePath: string) {
                     const scenarioStepDef = findStepDefinition(stepName);
                     const lastScenario = getLastScenario();
 
-                    lastScenario.steps.push({ name: step, definition: scenarioStepDef });
+                    lastScenario.steps.push({ id: ++id, type: StepType.Scenario, name: step, definition: scenarioStepDef });
                     break;
                 default:
                     throw new Error("Unexpected scope: " + currentScope);
