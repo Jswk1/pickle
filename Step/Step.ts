@@ -30,6 +30,8 @@ export interface IStep {
     type: StepType;
     name: string;
     definition: IStepDefinition;
+
+    nextStepId?: number;
 }
 
 export const stepDefinitions = new Map<string | RegExp, IStepDefinition>();

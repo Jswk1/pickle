@@ -3,6 +3,7 @@ import { argv } from "process";
 import * as Path from "path";
 import "./Step/Expression";
 import "./Step/Step";
+import "./Utils/Array";
 import { executeFeature, OutcomeStatus } from "./Feature/Executor";
 import { loadFeature } from "./Feature/Loader";
 import { queryFiles } from "./Utils/QueryFiles";

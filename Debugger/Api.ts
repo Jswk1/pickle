@@ -1,6 +1,7 @@
 import * as Express from "express";
 import { executeStep } from "../Feature/Executor";
 import { IFeature } from "../Feature/Loader";
+import { IStep } from "../Step/Step";
 
 export function getApiRouter(feature: IFeature) {
     const apiRouter = Express.Router();
@@ -23,13 +24,21 @@ export function getApiRouter(feature: IFeature) {
         res.sendStatus(200);
     });
 
-    apiRouter.post("/step/:id", async (req, res) => {
-        const stepId: number = Number(req.params.id);
+    apiRouter.post("/scenario/:scenarioId/step/:stepId", async (req, res) => {
+        const scenarioId = Number(req.params.scenarioId);
+        const stepId = Number(req.params.stepId);
 
-        const step = feature.scenarios.find(e => e.steps.some(e => e.id === stepId)).steps.find(e => e.id === stepId);
+        const scenario = feature.scenarios.find(e => e.id === scenarioId);
+        if (!scenario)
+            return res.sendStatus(404);
+
+        const step: IStep = feature.backgroundSteps.find(e => e.id === stepId) || scenario.steps.find(e => e.id === stepId);
+        if (!step)
+            return res.sendStatus(404);
+
         const stepOutcome = await executeStep(step, context);
 
-        res.send({ status: stepOutcome.status });
+        return res.send({ status: stepOutcome.status });
     });
 
     return apiRouter;
