@@ -10,6 +10,7 @@ import { queryFiles } from "./Utils/QueryFiles";
 import { Log } from "./Utils/Log";
 import { ReporterType, reportFeature } from "./Feature/Reporter/Factory";
 import { startDebugger } from "./Debugger/Server";
+import { stepDefinitions } from "./Step/Step";
 
 export interface IRunnerOptions {
     scriptsPath: string;
@@ -18,7 +19,9 @@ export interface IRunnerOptions {
     logOutputPath?: string;
     debug?: boolean;
     debugPort?: number;
+
     featureFullPath?: string;
+    requiredFilePaths?: string[];
 }
 
 function parseArgs(): IRunnerOptions {
@@ -77,21 +80,30 @@ function parseArgs(): IRunnerOptions {
     return options;
 }
 
+export function requireScripts(fileNames: string[]) {
+    stepDefinitions.clear();
+
+    const executionDirectory = process.cwd();
+    const fullPaths = fileNames.map(e => Path.isAbsolute(e) ? e : Path.join(executionDirectory, e));
+
+    for (const filePath of fullPaths)
+        if (require.cache[require.resolve(filePath)])
+            delete require.cache[require.resolve(filePath)];
+
+    for (const filePath of fullPaths)
+        require(filePath);
+}
+
 export default async function execute(options?: IRunnerOptions) {
     try {
         const runnerOptions = options || parseArgs();
 
         const stepDefinitionFiles = await queryFiles(runnerOptions.scriptsPath);
-        const executionDirectory = process.cwd();
-
-        for (const file of stepDefinitionFiles) {
-            const fullPath = Path.isAbsolute(file) ? file : Path.join(executionDirectory, file);
-            require(fullPath);
-        }
+        requireScripts(stepDefinitionFiles);
 
         Log.info(`${stepDefinitionFiles.length} files loaded.`);
 
-        const featureFullPath = Path.isAbsolute(runnerOptions.featurePath) ? runnerOptions.featurePath : Path.join(executionDirectory, runnerOptions.featurePath);
+        const featureFullPath = Path.isAbsolute(runnerOptions.featurePath) ? runnerOptions.featurePath : Path.join(process.cwd(), runnerOptions.featurePath);
         runnerOptions.featureFullPath = featureFullPath;
         const feature = await loadFeature(featureFullPath);
 
