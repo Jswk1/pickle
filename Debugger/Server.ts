@@ -1,15 +1,16 @@
 import * as Express from "express";
 import * as Path from "path";
 import { IFeature } from "../Feature/Loader";
+import { IRunnerOptions } from "../Runner";
 import { Log } from "../Utils/Log";
 import { getApiRouter } from "./Api";
 
-export function startDebugger(port = 3001, feature: IFeature) {
+export function startDebugger(port = 3001, feature: IFeature, options: IRunnerOptions) {
     const server = Express();
 
     server.use(Express.static(Path.join(__dirname, "./Public")));
 
-    server.use("/api", getApiRouter(feature));
+    server.use("/api", getApiRouter(feature, options));
 
     server.get("*", (req, res) => {
         res.sendFile(Path.join(__dirname, "./Public/Index.html"));

@@ -1,14 +1,20 @@
 import * as Express from "express";
 import { executeStep } from "../Feature/Executor";
-import { IFeature } from "../Feature/Loader";
+import { IFeature, loadFeature } from "../Feature/Loader";
+import { IRunnerOptions } from "../Runner";
 import { IStep } from "../Step/Step";
 
-export function getApiRouter(feature: IFeature) {
+export function getApiRouter(feature: IFeature, options: IRunnerOptions) {
     const apiRouter = Express.Router();
 
     const context = { variables: {} };
 
     apiRouter.get("/feature", (req, res) => {
+        res.send(feature);
+    });
+
+    apiRouter.post("/feature/reload", async (req, res) => {
+        feature = await loadFeature(options.featureFullPath);
         res.send(feature);
     });
 

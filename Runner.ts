@@ -18,6 +18,7 @@ export interface IRunnerOptions {
     logOutputPath?: string;
     debug?: boolean;
     debugPort?: number;
+    featureFullPath?: string;
 }
 
 function parseArgs(): IRunnerOptions {
@@ -90,11 +91,12 @@ export default async function execute(options?: IRunnerOptions) {
 
         Log.info(`${stepDefinitionFiles.length} files loaded.`);
 
-        const featureFileFullPath = Path.isAbsolute(runnerOptions.featurePath) ? runnerOptions.featurePath : Path.join(executionDirectory, runnerOptions.featurePath);
-        const feature = await loadFeature(featureFileFullPath);
+        const featureFullPath = Path.isAbsolute(runnerOptions.featurePath) ? runnerOptions.featurePath : Path.join(executionDirectory, runnerOptions.featurePath);
+        runnerOptions.featureFullPath = featureFullPath;
+        const feature = await loadFeature(featureFullPath);
 
         if (runnerOptions.debug) {
-            startDebugger(runnerOptions.debugPort || 3001, feature);
+            startDebugger(runnerOptions.debugPort || 3001, feature, runnerOptions);
         } else {
             const featureOutcome = await executeFeature(feature);
 

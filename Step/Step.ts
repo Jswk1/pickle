@@ -1,6 +1,6 @@
 import { IStepExpression, stepExpressionFactory } from "./Expression";
 
-type TContext = {
+export type TContext = {
     variables: {
         [key: string]: any;
     }

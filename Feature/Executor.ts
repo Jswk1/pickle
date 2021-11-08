@@ -1,5 +1,5 @@
 import { extractVariables } from "../Step/Expression";
-import { IStep } from "../Step/Step";
+import { IStep, TContext } from "../Step/Step";
 import { measureMiliseconds } from "../Utils/Time";
 import { IScenario, IFeature } from "./Loader";
 
@@ -38,7 +38,7 @@ async function runWithTimeout(timeoutMS: number, runFn: () => Promise<any>, onTi
     });
 }
 
-export async function executeStep(step: IStep, context: { variables: {} }) {
+export async function executeStep(step: IStep, context: TContext) {
     const variables = extractVariables(step);
 
     const stepOutcome: IStepOutcome = {
@@ -51,7 +51,7 @@ export async function executeStep(step: IStep, context: { variables: {} }) {
     try {
         stepOutcome.durationMs = await measureMiliseconds(async () => {
             await runWithTimeout(timeoutMS, async () => {
-                await step.definition.cb.apply(context, variables);
+                await step.definition.cb.call(context, variables);
             }, `Timeout after ${timeoutMS} milliseconds.`);
         });
     } catch (ex) {
