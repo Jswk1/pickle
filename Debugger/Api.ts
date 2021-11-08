@@ -44,7 +44,7 @@ export function getApiRouter(feature: IFeature, options: IRunnerOptions) {
 
         const stepOutcome = await executeStep(step, context);
 
-        return res.send({ status: stepOutcome.status });
+        return res.send({ status: stepOutcome.status, error: stepOutcome.error?.stack });
     });
 
     return apiRouter;
