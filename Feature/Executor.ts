@@ -63,7 +63,6 @@ export async function executeStep(step: IStep, context: TContext) {
 }
 
 export async function executeFeature(feature: IFeature) {
-    const context = { variables: {} };
     const featureOutcome: IFeatureOutcome = {
         feature,
         status: OutcomeStatus.Ok,
@@ -71,6 +70,7 @@ export async function executeFeature(feature: IFeature) {
     }
 
     for (let i = 0; i < feature.scenarios.length; i++) {
+        const context = { variables: {} };
         const scenario = feature.scenarios[i];
         const scenarioOutcome: IScenarioOutcome = {
             scenario,
