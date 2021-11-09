@@ -2,19 +2,18 @@ import * as Express from "express";
 import { executeStep } from "../Feature/Executor";
 import { IFeature, loadFeature } from "../Feature/Loader";
 import { IRunnerOptions, requireScripts } from "../Runner";
-import { IStep } from "../Step/Step";
+import { IStep, stepDefinitions } from "../Step/Step";
 import { queryFiles } from "../Utils/QueryFiles";
 
 export function getApiRouter(feature: IFeature, options: IRunnerOptions) {
-    const apiRouter = Express.Router();
-
+    const router = Express.Router();
     const context = { variables: {} };
 
-    apiRouter.get("/feature", (req, res) => {
+    router.get("/feature", (req, res) => {
         res.send(feature);
     });
 
-    apiRouter.post("/reload", async (req, res) => {
+    router.post("/reload", async (req, res) => {
         const stepDefinitionNames = await queryFiles(options.scriptsPath);
 
         requireScripts(stepDefinitionNames);
@@ -22,11 +21,11 @@ export function getApiRouter(feature: IFeature, options: IRunnerOptions) {
         res.sendStatus(200);
     });
 
-    apiRouter.get("/feature/variables", (req, res) => {
+    router.get("/feature/variables", (req, res) => {
         res.send(context.variables);
     });
 
-    apiRouter.post("/feature/variables", (req, res) => {
+    router.post("/feature/variables", (req, res) => {
         if (typeof req.body.variables !== "object")
             res.sendStatus(400);
 
@@ -34,10 +33,17 @@ export function getApiRouter(feature: IFeature, options: IRunnerOptions) {
         res.sendStatus(200);
     });
 
-    apiRouter.post("/scenario/:scenarioId/step/:stepId", async (req, res) => {
-        const scenarioId = Number(req.params.scenarioId);
-        const stepId = Number(req.params.stepId);
+    let lastScenarioId: number = null;
 
+    router.post("/scenario/:scenarioId/step/:stepId", async (req, res) => {
+        const scenarioId = Number(req.params.scenarioId);
+
+        if (scenarioId !== lastScenarioId) {
+            context.variables = {};
+            lastScenarioId = scenarioId;
+        }
+
+        const stepId = Number(req.params.stepId);
         const scenario = feature.scenarios.find(e => e.id === scenarioId);
         if (!scenario)
             return res.sendStatus(404);
@@ -48,8 +54,11 @@ export function getApiRouter(feature: IFeature, options: IRunnerOptions) {
 
         const stepOutcome = await executeStep(step, context);
 
+        if (stepOutcome.error)
+            console.log(stepOutcome.error);
+
         return res.send({ status: stepOutcome.status, error: stepOutcome.error?.stack });
     });
 
-    return apiRouter;
+    return router;
 }
