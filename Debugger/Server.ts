@@ -8,11 +8,11 @@ import { getApiRouter } from "./Api";
 export function startDebugger(port = 3001, feature: IFeature, options: IRunnerOptions) {
     const server = Express();
 
-    server.use(Express.static(Path.join(__dirname, "./Public")));
+    server.use("/static", Express.static(Path.join(__dirname, "./Public")));
 
     server.use("/api", getApiRouter(feature, options));
 
-    server.get("*", (req, res) => {
+    server.get("/", (req, res) => {
         res.sendFile(Path.join(__dirname, "./Public/Index.html"));
     });
 
