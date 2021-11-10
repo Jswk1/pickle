@@ -6,6 +6,7 @@ export interface IScenario {
     name: string;
     steps: IStep[];
 
+    isOutline?: boolean;
     nextScenarioId?: number;
 }
 
@@ -22,7 +23,9 @@ const gherkinCommentExpr = /^\#(?:.*)$/;
 enum GherkinScope {
     Feature = 0,
     Background = 1,
-    Scenario = 2
+    Scenario = 2,
+    ScenarioOutline = 3,
+    Examples = 4
 }
 
 function getGherkinScope(text: string) {

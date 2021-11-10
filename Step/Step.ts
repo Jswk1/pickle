@@ -17,7 +17,8 @@ export interface IStepDefinition {
 }
 
 interface IStepOptions {
-    timeoutMS?: number;
+    /** in milliseconds */
+    timeout?: number;
 }
 
 export enum StepType {
@@ -46,7 +47,7 @@ export function defineStep(firstArg: TPattern, secondArg: IStepOptions | TCallba
 
     if (typeof secondArg === "function") {
         thirdArg = secondArg;
-        secondArg = <IStepOptions>{ timeoutMS: 10000 };
+        secondArg = <IStepOptions>{ timeout: 10000 };
     }
 
     const expression = stepExpressionFactory(firstArg);
