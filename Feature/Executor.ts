@@ -34,7 +34,7 @@ async function runWithTimeout(timeoutMS: number, runFn: () => Promise<any>, onTi
     return new Promise((resolve, reject) => {
         runFn().then(resolve).catch(reject);
 
-        setTimeout(() => reject(onTimeoutError), timeoutMS);
+        setTimeout(() => reject(new Error(onTimeoutError)), timeoutMS);
     });
 }
 
