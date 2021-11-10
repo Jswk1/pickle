@@ -16,7 +16,7 @@ export interface IFeature {
     scenarios: IScenario[];
 }
 
-const gherkinSectionExpr = /^([A-Za-z]+)\:\s{0,}(.*)(?:\r\n)?$/;
+const gherkinSectionExpr = /^([A-Za-z ]+)\:\s{0,}(.*)(?:\r\n)?$/;
 const gherkinStepExpr = /^(?:given|when|then|and)(.*)$/i;
 const gherkinCommentExpr = /^\#(?:.*)$/;
 
@@ -39,6 +39,19 @@ function getGherkinScope(text: string) {
         default:
             throw new Error("Scope not found: " + text);
     }
+}
+
+function parseStep(stepId: number, type: StepType, line: string) {
+    const stepMatch = gherkinStepExpr.exec(line);
+    if (!stepMatch)
+        throw new Error("Incorrect step format: " + line);
+
+    const stepName = stepMatch[1].trim();
+    const stepDef = findStepDefinition(stepName);
+
+    const step: IStep = { id: stepId, type, name: line, definition: stepDef };
+
+    return step;
 }
 
 export async function loadFeature(featurePath: string) {
@@ -84,8 +97,13 @@ export async function loadFeature(featurePath: string) {
                         lastScenario.nextScenarioId = scenario.id;
 
                     lastFeature.scenarios.push(scenario);
-                default:
                     currentScope = scope;
+                    break;
+                case GherkinScope.Background:
+                    currentScope = scope;
+                    break;
+                default:
+                    throw new Error(`Unexpected section: ${sectionMatch[1]}.`);
             }
         } else {
             switch (currentScope) {
@@ -93,15 +111,8 @@ export async function loadFeature(featurePath: string) {
                     throw new Error("Unexpected line in feature scope.");
 
                 case GherkinScope.Background:
-                    const backgroundStepMatch = gherkinStepExpr.exec(line);
-                    if (!backgroundStepMatch)
-                        throw new Error("Incorrect step format: " + line);
-
-                    const backgroundStepName = backgroundStepMatch[1].trim();
-                    const backgroundStepDef = findStepDefinition(backgroundStepName);
-
+                    const backgroundStep = parseStep(++stepId, StepType.Background, line);
                     const lastFeature = features.last();
-                    const backgroundStep = { id: ++stepId, type: StepType.Background, name: line, definition: backgroundStepDef };
 
                     const lastBackgroundStep = lastFeature.backgroundSteps.last();
                     if (lastBackgroundStep)
@@ -111,16 +122,8 @@ export async function loadFeature(featurePath: string) {
 
                     break;
                 case GherkinScope.Scenario:
-                    const stepMatch = gherkinStepExpr.exec(line);
-                    if (!stepMatch)
-                        throw new Error("Incorrect step format: " + line);
-
-                    const stepName = stepMatch[1].trim();
-
-                    const scenarioStepDef = findStepDefinition(stepName);
+                    const step = parseStep(++stepId, StepType.Scenario, line);
                     const lastScenario = features.last().scenarios.last();
-
-                    const step = { id: ++stepId, type: StepType.Scenario, name: line, definition: scenarioStepDef };
 
                     const lastStep = lastScenario.steps.last();
                     if (lastStep)
