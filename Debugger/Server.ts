@@ -8,6 +8,7 @@ import { getApiRouter } from "./Api";
 export function startDebugger(port = 3001, feature: IFeature, options: IRunnerOptions) {
     const server = Express();
 
+    server.use(Express.json());
     server.use("/static", Express.static(Path.join(__dirname, "./Public")));
 
     server.use("/api", getApiRouter(feature, options));

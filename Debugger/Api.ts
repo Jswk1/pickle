@@ -25,12 +25,13 @@ export function getApiRouter(feature: IFeature, options: IRunnerOptions) {
         res.send(context.variables);
     });
 
-    router.post("/feature/variables", (req, res) => {
-        if (typeof req.body.variables !== "object")
-            res.sendStatus(400);
-
-        context.variables = Object.assign({}, context.variables, req.body.variables);
-        res.sendStatus(200);
+    router.post("/feature/variables", (req: Express.Request<{}, {}, { variables: object }>, res) => {
+        try {
+            context.variables = Object.assign({}, req.body.variables);
+            res.status(200).send(context.variables);
+        } catch (ex) {
+            res.status(500).send(ex);
+        }
     });
 
     let lastScenarioId: number = null;
