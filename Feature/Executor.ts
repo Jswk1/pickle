@@ -51,7 +51,7 @@ export async function executeStep(step: IStep, context: TContext) {
     try {
         stepOutcome.durationMs = await measureMiliseconds(async () => {
             await runWithTimeout(timeoutMS, async () => {
-                await step.definition.cb.call(context, variables);
+                await step.definition.cb.call(context, ...variables);
             }, `Timeout after ${timeoutMS} milliseconds.`);
         });
     } catch (ex) {

@@ -10,7 +10,11 @@ export function getApiRouter(feature: IFeature, options: IRunnerOptions) {
     const context = { variables: {} };
 
     router.get("/feature", (req, res) => {
-        res.send(feature);
+        res.send(JSON.stringify(feature, (k, v) => {
+            if (v instanceof RegExp)
+                return "__REGEXP" + v.toString();
+            return v;
+        }));
     });
 
     router.post("/reload", async (req, res) => {
@@ -58,7 +62,7 @@ export function getApiRouter(feature: IFeature, options: IRunnerOptions) {
         if (stepOutcome.error)
             console.log(stepOutcome.error);
 
-        return res.send({ status: stepOutcome.status, error: stepOutcome.error?.stack || stepOutcome.error.message });
+        return res.send({ status: stepOutcome.status, error: stepOutcome.error?.stack || stepOutcome.error?.message });
     });
 
     return router;
