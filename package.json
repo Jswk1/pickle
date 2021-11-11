@@ -22,7 +22,8 @@
   },
   "homepage": "https://github.com/Jswk1/pickle#readme",
   "dependencies": {
-    "express": "4.17.1"
+    "express": "4.17.1",
+    "ts-node": "10.4.0"
   },
   "devDependencies": {
     "typescript": "4.4.3",

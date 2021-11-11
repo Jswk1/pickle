@@ -1,3 +1,4 @@
 #!/usr/bin/env node
-
-require("../Runner.js").default();
+require("ts-node").register();
+require("../Runner.ts").default();
+//# sourceMappingURL=pickle.js.map
