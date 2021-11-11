@@ -39,8 +39,9 @@ export const stepDefinitions = new Map<string | RegExp, IStepDefinition>();
 
 export function defineStep(pattern: string, cb: TCallbackFuntion): void;
 export function defineStep(regexp: RegExp, cb: TCallbackFuntion): void;
-export function defineStep(pattern: string, options: IStepOptions, cb?: TCallbackFuntion): void
-export function defineStep(regexp: RegExp, options: IStepOptions, cb?: TCallbackFuntion): void
+export function defineStep(pattern: string, options: IStepOptions, cb?: TCallbackFuntion): void;
+export function defineStep(regexp: RegExp, options: IStepOptions, cb?: TCallbackFuntion): void;
+export function defineStep(firstArg: TPattern, secondArg: IStepOptions | TCallbackFuntion, thirdArg?: TCallbackFuntion): void;
 export function defineStep(firstArg: TPattern, secondArg: IStepOptions | TCallbackFuntion, thirdArg?: TCallbackFuntion) {
     if (stepDefinitions.has(firstArg))
         throw new Error(`Step '${firstArg}' is defined multiple times.`);
@@ -62,3 +63,9 @@ export function findStepDefinition(step: string) {
 
     return stepDef;
 }
+
+export const Given = defineStep;
+export const When = defineStep;
+export const Then = defineStep;
+export const And = defineStep;
+export const But = defineStep;

@@ -130,5 +130,5 @@ export default async function execute(options?: IRunnerOptions) {
 }
 
 export { execute };
-export { defineStep, TContext } from "./Step/Step";
+export { defineStep, Given, Then, When, And, But, TContext } from "./Step/Step";
 export { defineExpression } from "./Step/Expression";
