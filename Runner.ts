@@ -1,51 +1,64 @@
 
-
 import { argv } from "process";
 import * as Path from "path";
 import "./Step/Expression";
+import "./Step/Step";
+import "./Utils/Array";
 import { executeFeature, OutcomeStatus } from "./Feature/Executor";
 import { loadFeature } from "./Feature/Loader";
 import { queryFiles } from "./Utils/QueryFiles";
 import { Log } from "./Utils/Log";
 import { ReporterType, reportFeature } from "./Feature/Reporter/Factory";
+import { startDebugger } from "./Debugger/Server";
+import { stepDefinitions } from "./Step/Step";
 
 export interface IRunnerOptions {
-    path: string;
-    featureName: string;
-    headless?: boolean;
+    scriptsPath: string;
+    featurePath: string;
     jUnitXmlOutputPath?: string;
     logOutputPath?: string;
+    debug?: boolean;
+    debugPort?: number;
+
+    featureFullPath?: string;
+    requiredFilePaths?: string[];
 }
 
 function parseArgs(): IRunnerOptions {
-    const options: IRunnerOptions = { path: null, featureName: null };
+    const options: IRunnerOptions = { scriptsPath: null, featurePath: null };
 
     for (let i = 0; i < argv.length; i++) {
         const arg = argv[i];
         const nextArg = argv[i + 1]; // It's argument value most of the time
 
-        if (["-r", "--require"].some(e => e === arg)) {
-            if (!nextArg?.length)
-                throw new Error(`[Arg '${arg}'] Expected path.`);
+        switch (arg) {
+            case "-r":
+            case "--require":
+                if (!nextArg?.length)
+                    throw new Error(`[Arg '${arg}'] Expected path.`);
 
-            options.path = nextArg;
-            continue;
-        }
+                options.scriptsPath = nextArg;
+                break;
+            case "-j":
+            case "--junit":
+                if (!nextArg?.length)
+                    throw new Error(`[Arg '${arg}'] Expected output xml path.`);
 
-        if (["-j", "--junit"].some(e => e === arg)) {
-            if (!nextArg?.length)
-                throw new Error(`[Arg '${arg}'] Expected output xml path.`);
+                options.jUnitXmlOutputPath = nextArg;
+                break;
+            case "-o":
+            case "--output":
+                if (!nextArg?.length)
+                    throw new Error(`[Arg '${arg}'] Expected output log path.`);
 
-            options.jUnitXmlOutputPath = nextArg;
-            continue;
-        }
+                options.logOutputPath = nextArg;
+            case "-d":
+            case "--debug":
+                if (nextArg && !isNaN(Number(nextArg)))
+                    options.debugPort = Number(nextArg);
 
-        if (["-o", "--output"].some(e => e === arg)) {
-            if (!nextArg?.length)
-                throw new Error(`[Arg '${arg}'] Expected output log path.`);
-
-            options.logOutputPath = nextArg;
-            continue;
+                options.debug = true;
+                break;
         }
 
         // Is last argument
@@ -53,52 +66,69 @@ function parseArgs(): IRunnerOptions {
             if (!arg.endsWith(".feature"))
                 throw new Error("Expected feature name.");
 
-            options.featureName = arg;
+            options.featurePath = arg;
+            break;
         }
     }
 
-    if (!options.path)
+    if (!options.scriptsPath)
         throw new Error("Path to step definitions is required. (-r, --require <path> parameter)");
 
-    if (!options.featureName)
+    if (!options.featurePath)
         throw new Error("Feature name is required. (last parameter)");
 
     return options;
 }
 
-export default async function execute() {
+export function requireScripts(fileNames: string[]) {
+    stepDefinitions.clear();
+
+    const executionDirectory = process.cwd();
+    const fullPaths = fileNames.map(e => Path.isAbsolute(e) ? e : Path.join(executionDirectory, e));
+
+    for (const filePath of fullPaths)
+        if (require.cache[require.resolve(filePath)])
+            delete require.cache[require.resolve(filePath)];
+
+    for (const filePath of fullPaths)
+        require(filePath);
+}
+
+export default async function execute(options?: IRunnerOptions) {
     try {
-        const options = parseArgs();
+        const runnerOptions = options || parseArgs();
 
-        const stepDefinitionFiles = await queryFiles(options.path);
-        const executionDirectory = process.cwd();
-
-        for (const file of stepDefinitionFiles) {
-            const fullPath = Path.join(executionDirectory, file);
-            require(fullPath);
-        }
+        const stepDefinitionFiles = await queryFiles(runnerOptions.scriptsPath);
+        requireScripts(stepDefinitionFiles);
 
         Log.info(`${stepDefinitionFiles.length} files loaded.`);
 
-        const featureFileFullPath = Path.join(executionDirectory, options.featureName);
-        const feature = await loadFeature(featureFileFullPath);
-        const featureOutcome = await executeFeature(feature);
+        const featureFullPath = Path.isAbsolute(runnerOptions.featurePath) ? runnerOptions.featurePath : Path.join(process.cwd(), runnerOptions.featurePath);
+        runnerOptions.featureFullPath = featureFullPath;
+        const feature = await loadFeature(featureFullPath);
 
-        /** Report results */
-        await reportFeature(ReporterType.Stdout, featureOutcome, options);
+        if (runnerOptions.debug) {
+            startDebugger(runnerOptions.debugPort || 3001, feature, runnerOptions);
+        } else {
+            const featureOutcome = await executeFeature(feature);
 
-        if (options.jUnitXmlOutputPath)
-            await reportFeature(ReporterType.JUnit, featureOutcome, options);
+            /** Report results */
+            await reportFeature(ReporterType.Stdout, featureOutcome, runnerOptions);
 
-        if (options.logOutputPath)
-            await Log.save(options.logOutputPath);
+            if (runnerOptions.jUnitXmlOutputPath)
+                await reportFeature(ReporterType.JUnit, featureOutcome, runnerOptions);
 
-        process.exit(featureOutcome.status === OutcomeStatus.Ok ? 0 : 1);
+            if (runnerOptions.logOutputPath)
+                await Log.save(runnerOptions.logOutputPath);
+
+            process.exit(featureOutcome.status === OutcomeStatus.Ok ? 0 : 1);
+        }
     } catch (ex) {
         Log.error(ex);
         process.exit(1);
     }
 }
 
-export { defineStep } from "./Step/Step";
+export { execute };
+export { defineStep, Given, Then, When, And, But, TContext } from "./Step/Step";
 export { defineExpression } from "./Step/Expression";
