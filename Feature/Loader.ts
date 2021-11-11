@@ -17,7 +17,7 @@ export interface IFeature {
 }
 
 const gherkinSectionExpr = /^([A-Za-z ]+)\:\s{0,}(.*)(?:\r\n)?$/;
-const gherkinStepExpr = /^(?:given|when|then|and)(.*)$/i;
+const gherkinStepExpr = /^(?:given|when|then|and|but)(.*)$/i;
 const gherkinCommentExpr = /^\#(?:.*)$/;
 
 enum GherkinScope {
