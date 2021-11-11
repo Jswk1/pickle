@@ -16,9 +16,6 @@ export interface IStepExpression {
 }
 
 export function defineExpression(expr: IStepExpressionDef) {
-    if (stepExpressions.has(expr.key))
-        throw new Error(`Expression {${expr.key}} already exists.`);
-
     stepExpressions.set(expr.key, expr);
 }
 
