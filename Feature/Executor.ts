@@ -1,5 +1,5 @@
 import { extractVariables } from "../Step/Expression";
-import { IStep, TContext } from "../Step/Step";
+import { afterFeatureFn, afterScenarioFn, afterStepFn, beforeFeatureFn, beforeScenarioFn, beforeStepFn, IStep, TContext } from "../Step/Step";
 import { measureMiliseconds } from "../Utils/Time";
 import { IScenario, IFeature } from "./Loader";
 
@@ -10,14 +10,14 @@ export enum OutcomeStatus {
     Skipped = 8
 }
 
-interface IStepOutcome {
+export interface IStepOutcome {
     step: IStep;
     status: OutcomeStatus;
     error?: Error;
     durationMs: number;
 }
 
-interface IScenarioOutcome {
+export interface IScenarioOutcome {
     scenario: IScenario;
     status: OutcomeStatus;
     stepOutcomes: IStepOutcome[];
@@ -69,6 +69,9 @@ export async function executeFeature(feature: IFeature) {
         scenarioOutcomes: []
     }
 
+    if (typeof beforeFeatureFn === "function")
+        await beforeFeatureFn(feature);
+
     for (let i = 0; i < feature.scenarios.length; i++) {
         const context = { variables: {} };
         const scenario = feature.scenarios[i];
@@ -82,6 +85,9 @@ export async function executeFeature(feature: IFeature) {
 
         const stepList: IStep[] = [...feature.backgroundSteps, ...scenario.steps];
 
+        if (typeof beforeScenarioFn === "function")
+            await beforeScenarioFn(scenario);
+
         for (let j = 0; j < stepList.length; j++) {
             const step = stepList[j];
 
@@ -94,8 +100,14 @@ export async function executeFeature(feature: IFeature) {
                 process.stdout.write("Executing - Scenario: " + scenario.name + ` Step (${j + 1}/${stepList.length - 1}): ` + step.name);
             }
 
+            if (typeof beforeStepFn === "function")
+                await beforeStepFn(scenario, step);
+
             const stepOutcome = await executeStep(step, context);
             scenarioOutcome.stepOutcomes.push(stepOutcome);
+
+            if (typeof afterStepFn === "function")
+                await afterStepFn(scenario, step, stepOutcome);
 
             if (stepOutcome.status === OutcomeStatus.Error) {
                 featureOutcome.status = scenarioOutcome.status = OutcomeStatus.Error;
@@ -111,7 +123,13 @@ export async function executeFeature(feature: IFeature) {
                 break;
             }
         }
+
+        if (typeof afterScenarioFn === "function")
+            await afterScenarioFn(scenario, scenarioOutcome);
     }
+
+    if (typeof afterFeatureFn === "function")
+        await afterFeatureFn(feature, featureOutcome);
 
     return featureOutcome;
 }
