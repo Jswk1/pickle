@@ -17,17 +17,21 @@ export interface IFeature {
     scenarios: IScenario[];
 }
 
-export async function loadFeature(featurePath: string) {
-
+export async function loadFeatureFile(featurePath: string) {
     const exists = await FsAsync.exists(featurePath);
-
     if (!exists)
         throw new Error(`Feature not found: ${featurePath}`);
 
-    const fileContent = (await FsAsync.readFile(featurePath)).replace(/^(?:\s*|\s*#.*?)$/mgs, ""); // Clear comments and empty lines
+    const fileContent = await FsAsync.readFile(featurePath);
 
-    const gherkinSectionExpr = /(?:(Feature|Background|Scenario Outline|Scenario)):([\S ]*)(.*?)(?=Background|Scenario Outline|Scenario|$)/gsi;
-    const gherkinSectionList = Array.from(fileContent.matchAll(gherkinSectionExpr));
+    return fileContent;
+}
+
+export function loadFeature(featureFileContent: string) {
+    featureFileContent = featureFileContent.replace(/^(?:\s*|\s*#.*?)$/mgs, ""); // Clear comments and empty lines
+
+    const gherkinSectionExpr = /(?:(Feature|Background|Scenario Outline|Scenario)):([\S ]*)(.*?)(?=(?:Background|Scenario Outline|Scenario):|$)/gsi;
+    const gherkinSectionList = Array.from(featureFileContent.matchAll(gherkinSectionExpr));
 
     if (gherkinSectionList.length === 0)
         throw new Error("Could not parse feature file.");
@@ -57,7 +61,7 @@ export async function loadFeature(featurePath: string) {
         switch (sectionType) {
             case "feature":
                 feature.name = sectionName;
-                feature.description = sectionContent;
+                feature.description = sectionContent.split("\n").map(e => e.trim()).join("\n");
                 break;
             case "scenario":
                 const scenario = loadScenario(sectionName, sectionContent);
@@ -105,7 +109,7 @@ function loadOutline(name: string, content: string) {
         });
 
         try {
-            scenarios.push(loadScenario(name, scenarioContent));
+            scenarios.push({ ...loadScenario(name, scenarioContent), isOutline: true });
         } catch (ex) {
             throw new Error(`Error when loading outline '${name}': ${ex.message}`);
         }
@@ -146,7 +150,7 @@ function loadSteps(lines: string[], type: StepType) {
     const steps: IStep[] = [];
 
     for (const line of lines) {
-        const step = parseStep(type, line);
+        const step = parseStep(type, line.trim());
 
         const lastStep = steps.last();
         if (lastStep)

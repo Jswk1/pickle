@@ -5,7 +5,7 @@ import "./Step/Expression";
 import "./Step/Step";
 import "./Utils/Array";
 import { executeFeature, OutcomeStatus } from "./Feature/Executor";
-import { loadFeature } from "./Feature/Loader";
+import { loadFeature, loadFeatureFile } from "./Feature/Loader";
 import { queryFiles } from "./Utils/QueryFiles";
 import { Log } from "./Utils/Log";
 import { ReporterType, reportFeature } from "./Feature/Reporter/Factory";
@@ -105,7 +105,9 @@ export default async function execute(options?: IRunnerOptions) {
 
         const featureFullPath = Path.isAbsolute(runnerOptions.featurePath) ? runnerOptions.featurePath : Path.join(process.cwd(), runnerOptions.featurePath);
         runnerOptions.featureFullPath = featureFullPath;
-        const feature = await loadFeature(featureFullPath);
+
+        const fileContent = await loadFeatureFile(featureFullPath);
+        const feature = loadFeature(fileContent);
 
         if (runnerOptions.debug) {
             startDebugger(runnerOptions.debugPort || 3001, feature, runnerOptions);
