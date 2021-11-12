@@ -104,7 +104,11 @@ function loadOutline(name: string, content: string) {
             scenarioContent = scenarioContent.split(`<${k}>`).join(v[j]);
         });
 
-        scenarios.push(loadScenario(name, scenarioContent));
+        try {
+            scenarios.push(loadScenario(name, scenarioContent));
+        } catch (ex) {
+            throw new Error(`Error when loading outline '${name}': ${ex.message}`);
+        }
     });
 
     return scenarios;
