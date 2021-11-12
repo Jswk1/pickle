@@ -1,6 +1,6 @@
 import * as Express from "express";
 import { executeStep } from "../Feature/Executor";
-import { IFeature, loadFeature } from "../Feature/Loader";
+import { IFeature, loadFeature, loadFeatureFile } from "../Feature/Loader";
 import { IRunnerOptions, requireScripts } from "../Runner";
 import { IStep, stepDefinitions } from "../Step/Step";
 import { queryFiles } from "../Utils/QueryFiles";
@@ -21,7 +21,8 @@ export function getApiRouter(feature: IFeature, options: IRunnerOptions) {
         const stepDefinitionNames = await queryFiles(options.scriptsPath);
 
         requireScripts(stepDefinitionNames);
-        feature = await loadFeature(options.featureFullPath);
+        const featureFileContent = await loadFeatureFile(options.featureFullPath);
+        feature = loadFeature(featureFileContent);
         res.sendStatus(200);
     });
 

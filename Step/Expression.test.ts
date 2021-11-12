@@ -6,25 +6,25 @@ describe("Step Expression Tests", () => {
     describe("expressionFromString", () => {
         it("should convert steps without custom expressions", () => {
             const out1 = expressionFromString("When This test is ran.");
-            expect(out1.regexp.toString()).to.be.equal("/When This test is ran\\./");
+            expect(out1.regexp.toString()).to.be.equal("/^When This test is ran\\.$/");
             expect(out1.parsers).to.be.empty;
 
             const out2 = expressionFromString("Then This test will be [green?]");
-            expect(out2.regexp.toString()).to.be.equal("/Then This test will be \\[green\\?\\]/");
+            expect(out2.regexp.toString()).to.be.equal("/^Then This test will be \\[green\\?\\]$/");
             expect(out2.parsers).to.be.empty;
         });
 
         it("should convert steps with custom expressions", () => {
             const out1 = expressionFromString("When This test is ran for the {int} time.");
-            expect(out1.regexp.toString()).to.be.equal("/When This test is ran for the (\\\-?\\\d*) time\\./");
+            expect(out1.regexp.toString()).to.be.equal("/^When This test is ran for the (\\\-?\\\d*) time\\.$/");
             expect(out1.parsers.length).to.be.equal(1);
 
             const out2 = expressionFromString("Then The result of this test will be {string}.");
-            expect(out2.regexp.toString()).to.be.equal("/Then The result of this test will be (?:\\\"(.*)\\\")\\./");
+            expect(out2.regexp.toString()).to.be.equal("/^Then The result of this test will be (?:\\\"(.*)\\\")\\.$/");
             expect(out2.parsers.length).to.be.equal(1);
 
             const out3 = expressionFromString("Step {int} with {decimal} many {string} expressions.");
-            expect(out3.regexp.toString()).to.be.equal("/Step (\\\-?\\\d*) with (\\\-?\\\d*\\\.?\\\d*) many (?:\\\"(.*)\\\") expressions\\./");
+            expect(out3.regexp.toString()).to.be.equal("/^Step (\\\-?\\\d*) with (\\\-?\\\d*\\\.?\\\d*) many (?:\\\"(.*)\\\") expressions\\.$/");
             expect(out3.parsers.length).to.be.equal(3);
         });
     });
