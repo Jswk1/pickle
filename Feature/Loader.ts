@@ -18,7 +18,6 @@ export interface IFeature {
 }
 
 export async function loadFeature(featurePath: string) {
-    let scenarioId = 1;
 
     const exists = await FsAsync.exists(featurePath);
 
@@ -42,6 +41,14 @@ export async function loadFeature(featurePath: string) {
         scenarios: []
     };
 
+    const addScenario = (scenario: IScenario) => {
+        const lastScenario = feature.scenarios.last();
+        if (lastScenario)
+            lastScenario.nextScenarioId = scenario.id;
+
+        feature.scenarios.push(scenario);
+    }
+
     for (const match of gherkinSectionList) {
         const sectionType: TSectionType = match[1].trim().toLowerCase() as TSectionType;
         const sectionName = match[2]?.trim();
@@ -53,22 +60,19 @@ export async function loadFeature(featurePath: string) {
                 feature.description = sectionContent;
                 break;
             case "scenario":
-                const scenario: IScenario = {
-                    id: ++scenarioId,
-                    name: sectionName,
-                    steps: loadSteps(sectionContent.split("\n"), StepType.Scenario)
-                }
+                const scenario = loadScenario(sectionName, sectionContent);
+                addScenario(scenario);
 
-                const lastScenario = feature.scenarios.last();
-                if (lastScenario)
-                    lastScenario.nextScenarioId = scenario.id;
-
-                feature.scenarios.push(scenario);
                 break;
             case "background":
                 feature.backgroundSteps = loadSteps(sectionContent.split("\n"), StepType.Background)
                 break;
             case "scenario outline":
+                const scenarios = loadOutline(sectionName, sectionContent);
+
+                for (const scenario of scenarios)
+                    addScenario(scenario);
+
                 break;
             default:
                 throw new Error("Unknown section: " + sectionType);
@@ -79,12 +83,66 @@ export async function loadFeature(featurePath: string) {
 }
 
 let stepId = 1;
+let scenarioId = 1;
+
+function loadOutline(name: string, content: string) {
+    const examplesSecionRegexp = /Examples:\s*(\|.*\|)/si;
+    const examplesMatch = examplesSecionRegexp.exec(content);
+
+    if (!examplesMatch)
+        throw new Error("Examples section is missing in scenario outline: " + name);
+
+    const { keys, values } = loadExamplesMap(examplesMatch[1]);
+    const outlineWithoutExamples = content.replace(examplesSecionRegexp, "").trim();
+
+    const scenarios: IScenario[] = [];
+
+    values.forEach(v => {
+        let scenarioContent = outlineWithoutExamples;
+
+        keys.forEach((k, j) => {
+            scenarioContent = scenarioContent.split(`<${k}>`).join(v[j]);
+        });
+
+        scenarios.push(loadScenario(name, scenarioContent));
+    });
+
+    return scenarios;
+}
+
+function loadExamplesMap(content: string) {
+    const keys: string[] = [];
+    const values: Array<string[]> = [];
+
+    const lines = content.split("\n");
+    for (let i = 0; i < lines.length; i++) {
+        const parts = lines[i].trim().slice(1, -1).split("|").map(e => e.trim());
+
+        // Header with keys
+        if (i === 0)
+            keys.push(...parts);
+        else
+            values.push([...parts]);
+    }
+
+    return { keys, values };
+}
+
+function loadScenario(name: string, content: string) {
+    const scenario: IScenario = {
+        id: ++scenarioId,
+        name: name,
+        steps: loadSteps(content.split("\n"), StepType.Scenario)
+    }
+
+    return scenario;
+}
 
 function loadSteps(lines: string[], type: StepType) {
     const steps: IStep[] = [];
 
     for (const line of lines) {
-        const step = parseStep(++stepId, type, line);
+        const step = parseStep(type, line);
 
         const lastStep = steps.last();
         if (lastStep)
@@ -96,7 +154,7 @@ function loadSteps(lines: string[], type: StepType) {
     return steps;
 }
 
-function parseStep(stepId: number, type: StepType, line: string) {
+function parseStep(type: StepType, line: string) {
     const stepMatch = /^(?:given|when|then|and|but)(.*)$/i.exec(line.trim());
     if (!stepMatch)
         throw new Error("Incorrect step format: " + line);
@@ -104,7 +162,7 @@ function parseStep(stepId: number, type: StepType, line: string) {
     const stepName = stepMatch[1].trim();
     const stepDef = findStepDefinition(stepName);
 
-    const step: IStep = { id: stepId, type, name: line, definition: stepDef };
+    const step: IStep = { id: ++stepId, type, name: line, definition: stepDef };
 
     return step;
 }

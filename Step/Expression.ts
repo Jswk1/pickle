@@ -61,7 +61,7 @@ export function expressionFromString(stepPattern: string): IStepExpression {
     });
 
     return {
-        regexp: new RegExp(stepExpr),
+        regexp: new RegExp("^" + stepExpr + "$"),
         parsers: resolvers
     }
 }
