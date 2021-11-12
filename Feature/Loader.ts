@@ -1,4 +1,4 @@
-import { IStep, findStepDefinition, stepDefinitions, StepType } from "../Step/Step";
+import { IStep, findStepDefinition, stepDefinitions, StepType, TStepKeyword } from "../Step/Step";
 import { FsAsync } from "../Utils/FsAsync";
 
 export interface IScenario {
@@ -163,14 +163,15 @@ function loadSteps(lines: string[], type: StepType) {
 }
 
 function parseStep(type: StepType, line: string) {
-    const stepMatch = /^(?:given|when|then|and|but)(.*)$/i.exec(line.trim());
+    const stepMatch = /^(given|when|then|and|but)(.*)$/i.exec(line.trim());
     if (!stepMatch)
         throw new Error("Incorrect step format: " + line);
 
-    const stepName = stepMatch[1].trim();
+    const keyword = stepMatch[1].trim() as TStepKeyword;
+    const stepName = stepMatch[2].trim();
     const stepDef = findStepDefinition(stepName);
 
-    const step: IStep = { id: ++stepId, type, name: line, definition: stepDef };
+    const step: IStep = { id: ++stepId, type, keyword, name: stepName, definition: stepDef };
 
     return step;
 }

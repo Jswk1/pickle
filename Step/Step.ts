@@ -28,9 +28,12 @@ export enum StepType {
     Scenario = 2
 }
 
+export type TStepKeyword = "given" | "when" | "then" | "and" | "but";
+
 export interface IStep {
     id: number;
     type: StepType;
+    keyword: TStepKeyword;
     name: string;
     definition: IStepDefinition;
 

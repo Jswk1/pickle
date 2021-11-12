@@ -58,12 +58,17 @@ export function getApiRouter(feature: IFeature, options: IRunnerOptions) {
         if (!step)
             return res.sendStatus(404);
 
-        const stepOutcome = await executeStep(step, context);
+        try {
+            const stepOutcome = await executeStep(step, context);
 
-        if (stepOutcome.error)
-            console.log(stepOutcome.error);
+            if (stepOutcome.error)
+                console.log(stepOutcome.error);
 
-        return res.send({ status: stepOutcome.status, error: stepOutcome.error?.stack || stepOutcome.error?.message });
+            return res.send({ status: stepOutcome.status, error: stepOutcome.error?.stack || stepOutcome.error?.message });
+        } catch (ex) {
+            console.log(ex);
+            return res.status(500).send(ex);
+        }
     });
 
     return router;

@@ -75,10 +75,10 @@ export function expressionFromRegexp(stepPattern: RegExp): IStepExpression {
 
 export function extractVariables(step: IStep) {
     const variables: any[] = [];
-
     const match = step.definition.expression.regexp.exec(step.name);
+
     if (!match)
-        throw new Error(`Couldn't extract variables from step '${step.definition}'.`);
+        throw new Error(`Couldn't extract variables from step '${step.name}'.`);
     if (typeof step.definition.pattern === "string") {
         for (let i = 1; i < match.length; i++) {
             const rawValue = match[i];
