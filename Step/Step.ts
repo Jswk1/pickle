@@ -2,13 +2,15 @@ import { IFeatureOutcome, IScenarioOutcome, IStepOutcome } from "../Feature/Exec
 import { IFeature, IScenario } from "../Feature/Loader";
 import { IStepExpression, stepExpressionFactory } from "./Expression";
 
-export type TContext<T = any> = {
+export type TContext<T = { [key: string]: any }> = {
     variables: {
         [key: string]: any;
     }
 } & T;
 
-export type TCallbackFuntion = (this: TContext, ...args: any[]) => Promise<void>;
+type TPromisable<T> = Promise<T> | T;
+
+export type TCallbackFuntion = (this: TContext, ...args: any[]) => TPromisable<void>;
 export type TPattern = string | RegExp;
 
 export interface IStepDefinition {
@@ -77,8 +79,8 @@ export const But = defineStep;
 
 /** Hooks */
 
-export let beforeFeatureFn: (feature: IFeature) => Promise<void>;
-export let afterFeatureFn: (feature: IFeature, outcome: IFeatureOutcome) => Promise<void>;
+export let beforeFeatureFn: (feature: IFeature) => TPromisable<void>;
+export let afterFeatureFn: (feature: IFeature, outcome: IFeatureOutcome) => TPromisable<void>;
 
 export function beforeFeature(fn: typeof beforeFeatureFn) {
     beforeFeatureFn = fn;
@@ -87,8 +89,8 @@ export function afterFeature(fn: typeof afterFeatureFn) {
     afterFeatureFn = fn;
 }
 
-export let beforeScenarioFn: (scenario: IScenario) => Promise<void>;
-export let afterScenarioFn: (scenario: IScenario, outcome: IScenarioOutcome) => Promise<void>;
+export let beforeScenarioFn: (scenario: IScenario) => TPromisable<void>;
+export let afterScenarioFn: (scenario: IScenario, outcome: IScenarioOutcome) => TPromisable<void>;
 
 export function beforeScenario(fn: typeof beforeScenarioFn) {
     beforeScenarioFn = fn;
@@ -97,8 +99,8 @@ export function afterScenario(fn: typeof afterScenarioFn) {
     afterScenarioFn = fn;
 }
 
-export let beforeStepFn: (scenario: IScenario, step: IStep) => Promise<void>;
-export let afterStepFn: (scenario: IScenario, step: IStep, outcome: IStepOutcome) => Promise<void>;
+export let beforeStepFn: (scenario: IScenario, step: IStep) => TPromisable<void>;
+export let afterStepFn: (scenario: IScenario, step: IStep, outcome: IStepOutcome) => TPromisable<void>;
 
 export function beforeStep(fn: typeof beforeStepFn) {
     beforeStepFn = fn;
