@@ -1,4 +1,4 @@
-import { IRunnerOptions } from "../../Runner";
+import { IRunnerOptions } from "../../Options";
 import { IFeatureOutcome } from "../Executor";
 import { reportFeatureToJUnitXml } from "../JUnitReporter";
 import { reportFeatureToStdout } from "./StdoutReporter";

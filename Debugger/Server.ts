@@ -1,7 +1,7 @@
 import * as Express from "express";
 import * as Path from "path";
 import { IFeature } from "../Feature/Loader";
-import { IRunnerOptions } from "../Runner";
+import { IRunnerOptions } from "../Options";
 import { Log } from "../Utils/Log";
 import { getApiRouter } from "./Api";
 

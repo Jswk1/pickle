@@ -75,7 +75,7 @@ function toPosix(path: string) {
     return path.split(Path.sep).join(Path.posix.sep);
 }
 
-export async function queryFiles(path: string) {
+export async function queryFilesByGlob(path: string) {
     const entryPoint = Path.isAbsolute(path) ? path : extractEntryDirectory(path);
     const regexp = createRegexFromPattern(toPosix(path));
     const allFilePaths = await FsAsync.deepReaddir(entryPoint);

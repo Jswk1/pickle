@@ -1,8 +1,8 @@
-import { IRunnerOptions } from "../../Runner";
 import { encodeXmlString, ISerializabjeJsonNode, jsonToXML, stubify } from "../../Utils/JsonToXML";
 import { IFeatureOutcome, OutcomeStatus } from "../Executor";
 import * as Path from "path";
 import { FsAsync } from "../../Utils/FsAsync";
+import { IRunnerOptions } from "../../Options";
 
 function toSeconds(milliseconds: number) {
     return milliseconds / 1000;
