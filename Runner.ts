@@ -67,5 +67,5 @@ export default async function execute(initialOptions?: IRunnerOptions) {
 }
 
 export { execute };
-export { defineStep, Given, Then, When, And, But, TContext } from "./Step/Step";
+export { defineStep, Given, Then, When, And, But, TContext, beforeScenario, afterScenario, beforeFeature, afterFeature, beforeStep, afterStep } from "./Step/Step";
 export { defineExpression } from "./Step/Expression";
