@@ -47,7 +47,7 @@ export async function reportFeatureToJUnitXml(featureOutcome: IFeatureOutcome, o
                 name: "testcase",
                 attributes: [
                     { name: "classname", value: stubify(stepOutcome.step.name) },
-                    { name: "name", value: stepOutcome.step.name },
+                    { name: "name", value: encodeXmlString(stepOutcome.step.name) },
                     { name: "time", value: toSeconds(stepOutcome.durationMs).toString() }
                 ],
                 children: []
