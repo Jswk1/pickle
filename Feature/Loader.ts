@@ -27,6 +27,13 @@ export async function loadFeatureFile(featurePath: string) {
     return fileContent;
 }
 
+let stepId = 1;
+let scenarioId = 1;
+
+export function resetId() {
+    stepId = scenarioId = 1;
+}
+
 export function loadFeature(featureFileContent: string) {
     featureFileContent = featureFileContent.replace(/^(?:\s*|\s*#.*?)$/mgs, ""); // Clear comments and empty lines
 
@@ -85,9 +92,6 @@ export function loadFeature(featureFileContent: string) {
 
     return feature;
 }
-
-let stepId = 1;
-let scenarioId = 1;
 
 function loadOutline(name: string, content: string) {
     const examplesSecionRegexp = /Examples:\s*(\|.*\|)/si;
