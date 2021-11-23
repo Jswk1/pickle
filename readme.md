@@ -1,7 +1,7 @@
 
 # About
 
-Simpler, dependency free version of CucumberJS library. 
+Lighweight version of CucumberJS library. Supports real-time test debugging.
 
 # API
 
