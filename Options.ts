@@ -19,6 +19,9 @@ export function parseArgs(): IRunnerOptions {
         const arg = argv[i];
         const nextArg = argv[i + 1]; // It's argument value most of the time
 
+        if (!options.featurePath && /["']?(.*\.feature)["']?/.test(arg))
+            options.featurePath = arg;
+
         switch (arg) {
             case "-r":
             case "--require":
@@ -48,22 +51,13 @@ export function parseArgs(): IRunnerOptions {
                 options.debug = true;
                 break;
         }
-
-        // Is last argument
-        if (i === argv.length - 1) {
-            if (!arg.endsWith(".feature"))
-                throw new Error("Expected feature name.");
-
-            options.featurePath = arg;
-            break;
-        }
     }
 
     if (!options.scriptsPath)
         throw new Error("Path to step definitions is required. (-r, --require <path> parameter)");
 
     if (!options.featurePath)
-        throw new Error("Feature name is required. (last parameter)");
+        throw new Error("Feature file path is required.");
 
     return options;
 }
