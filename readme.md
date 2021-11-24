@@ -90,8 +90,14 @@ defineStep("Checkbox state is set to {bool}.", async function (state: boolean) {
 
 Command line usage:
 ```
-pickle [(-r, --require <glob_expr>), (-j, --junit <xml_path>), (-o, --output <log_path>)] <feature_path>
+pickle [(-r, --require <glob_expr>), (-j, --junit <xml_path>), (-o, --output <log_path>), -d] <feature_path>
 ```
+
+Parameters:
+*  `-r <glob_expr>` `--require <glob_expr>` - Path to directory with all step definitions. Should end with *.js or (preferably) *.ts
+*  `-j <xml_path>` `--junit <xml_path>` - Path to save the JUnit xml with test execution summary
+*  `-o <log_path>` `--output <log_path>` - Path to save the test execution log
+*  `-d` `--debug` - Execute test in debug mode. For details please take a look a the `Debugger` section.
 
 Examples:
 
@@ -110,7 +116,14 @@ pickle -r ./Flows/**/*.js -j ./junit.xml -o ./Output.log ./test.feature
 pickle --require ./Flows/**/*.js --junit ./junit.xml --output ./Output.log ./test.feature
 ```
 
+# Debugger
 
+Pickle test runner is delivered with web based debugging tool which allows running features in step by step mode. Features:
+*  Run feature steps and pause at any time
+*  Step Breakpoints
+*  Ability to edit test variables during execution
+*  On-demand reload of source files. Useful when step definitions are adjusted and you want to continue the test where it failed.
 
-# Not supported yet
-* Data tables in features
+The source for Pickle Debugger is available in separate repository. The compiled bundle.js and index.html file is built and included in Pickle Test Runner.
+
+https://github.com/Jswk1/pickle-debugger
