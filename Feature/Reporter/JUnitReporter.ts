@@ -94,5 +94,6 @@ export async function reportFeatureToJUnitXml(featureOutcome: IFeatureOutcome, o
 
     const xml = jsonToXML(rootJson);
     const outFullPath = Path.normalize(Path.join(process.cwd(), options.jUnitXmlOutputPath));
+    await FsAsync.mkdir(Path.dirname(outFullPath), { recursive: true });
     await FsAsync.writeFile(outFullPath, xml);
 }

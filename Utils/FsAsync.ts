@@ -53,6 +53,17 @@ export class FsAsync {
         });
     }
 
+    static async mkdir(path: string, options: Fs.MakeDirectoryOptions & { recursive: true; }) {
+        return new Promise<void>((resolve, reject) => {
+            Fs.mkdir(path, options, (err) => {
+                if (err)
+                    reject(err);
+
+                resolve();
+            });
+        });
+    }
+
     static async deepReaddir(path: string) {
         const temp: string[] = [];
 
