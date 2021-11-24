@@ -43,6 +43,7 @@ export function parseArgs(): IRunnerOptions {
                     throw new Error(`[Arg '${arg}'] Expected output log path.`);
 
                 options.logOutputPath = nextArg;
+                break;
             case "-d":
             case "--debug":
                 if (nextArg && !isNaN(Number(nextArg)))
