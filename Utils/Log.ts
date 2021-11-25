@@ -86,6 +86,8 @@ export class Log {
     }
 
     static async save(path: string) {
+        this.info(`Writing log output to: ${path}`);
+
         const fullPath = Path.normalize(path);
         await FsAsync.mkdir(Path.dirname(fullPath), { recursive: true });
         await FsAsync.writeFile(fullPath, clearColor(this._logHistory.map(e => `${e.timeStamp.toISOString()}: ${e.message}`).join("\n")));

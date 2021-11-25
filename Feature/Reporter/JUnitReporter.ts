@@ -3,6 +3,7 @@ import { IFeatureOutcome, OutcomeStatus } from "../Executor";
 import * as Path from "path";
 import { FsAsync } from "../../Utils/FsAsync";
 import { IRunnerOptions } from "../../Options";
+import { Log } from "../../Utils/Log";
 
 function toSeconds(milliseconds: number) {
     return milliseconds / 1000;
@@ -94,6 +95,9 @@ export async function reportFeatureToJUnitXml(featureOutcome: IFeatureOutcome, o
 
     const xml = jsonToXML(rootJson);
     const outFullPath = Path.normalize(Path.join(process.cwd(), options.jUnitXmlOutputPath));
+
+    Log.info(`Writing junit output to: ${outFullPath}`);
+
     await FsAsync.mkdir(Path.dirname(outFullPath), { recursive: true });
     await FsAsync.writeFile(outFullPath, xml);
 }
