@@ -153,8 +153,13 @@ function loadScenario(name: string, content: string) {
 function loadSteps(lines: string[], type: StepType) {
     const steps: IStep[] = [];
 
-    for (const line of lines) {
-        const step = parseStep(type, line.trim());
+    for (let line of lines) {
+        line = line.trim();
+
+        if (line === "")
+            continue;
+
+        const step = parseStep(type, line);
 
         const lastStep = steps.last();
         if (lastStep)

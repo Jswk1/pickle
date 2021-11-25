@@ -33,6 +33,9 @@ export default async function execute(initialOptions?: IRunnerOptions) {
     try {
         const options = initialOptions || parseArgs();
 
+        if (!options.logOutputPath)
+            options.logOutputPath = "./log.log";
+
         const stepDefinitionFileNames = await queryFilesByGlob(options.scriptsPath);
         requireScripts(stepDefinitionFileNames);
 

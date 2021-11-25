@@ -1,6 +1,6 @@
 {
   "name": "pickle-test-runner",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "",
   "main": "Runner.js",
   "types": "Runner.d.ts",
