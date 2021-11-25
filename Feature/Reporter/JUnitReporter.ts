@@ -94,7 +94,7 @@ export async function reportFeatureToJUnitXml(featureOutcome: IFeatureOutcome, o
     }
 
     const xml = jsonToXML(rootJson);
-    const outFullPath = Path.normalize(Path.join(process.cwd(), options.jUnitXmlOutputPath));
+    const outFullPath = Path.normalize(options.jUnitXmlOutputPath);
 
     Log.info(`Writing junit output to: ${outFullPath}`);
 
