@@ -1,6 +1,6 @@
 import { extractVariables } from "../Step/Expression";
 import { afterFeatureFn, afterScenarioFn, afterStepFn, beforeFeatureFn, beforeScenarioFn, beforeStepFn, IStep, TContext } from "../Step/Step";
-import { measureMiliseconds } from "../Utils/Time";
+import { performance } from "perf_hooks";
 import { IScenario, IFeature } from "./Loader";
 
 export enum OutcomeStatus {
@@ -48,16 +48,18 @@ export async function executeStep(step: IStep, context: TContext) {
     };
 
     const { timeout } = step.definition.options;
+
+    const startTime = performance.now();
     try {
-        stepOutcome.durationMs = await measureMiliseconds(async () => {
-            await runWithTimeout(timeout, async () => {
-                await step.definition.cb.call(context, ...variables);
-            }, `Timeout after ${timeout} milliseconds.`);
-        });
+        await runWithTimeout(timeout, async () => {
+            await step.definition.cb.call(context, ...variables);
+        }, `Timeout after ${timeout} milliseconds.`);
     } catch (ex) {
         stepOutcome.status = OutcomeStatus.Error;
         stepOutcome.error = ex;
     } finally {
+        const finishTime = performance.now();
+        stepOutcome.durationMs = Math.round(finishTime - startTime);
         return stepOutcome;
     }
 }
@@ -91,14 +93,7 @@ export async function executeFeature(feature: IFeature) {
         for (let j = 0; j < stepList.length; j++) {
             const step = stepList[j];
 
-            /**
-             * Check if execuced from command line. It will not work in debugger.
-             */
-            if (typeof process.stdout.clearLine === "function") {
-                process.stdout.clearLine(undefined);
-                process.stdout.cursorTo(0);
-                process.stdout.write("Executing - Scenario: " + scenario.name + ` Step (${j + 1}/${stepList.length - 1}): ` + step.name);
-            }
+            console.log("Executing - Scenario: " + scenario.name + ` Step (${j + 1}/${stepList.length - 1}): ` + step.name);
 
             if (typeof beforeStepFn === "function")
                 await beforeStepFn(scenario, step);

@@ -1,5 +1,6 @@
 import { IFeatureOutcome, IScenarioOutcome, IStepOutcome } from "../Feature/Executor";
 import { IFeature, IScenario } from "../Feature/Loader";
+import { getExecutionFileName } from "../Utils/Trace";
 import { IStepExpression, stepExpressionFactory } from "./Expression";
 
 export type TContext<T = { [key: string]: any }> = {
@@ -18,6 +19,7 @@ export interface IStepDefinition {
     options: IStepOptions;
     cb: TCallbackFuntion;
     expression: IStepExpression;
+    filePath?: string;
 }
 
 interface IStepOptions {
@@ -59,7 +61,7 @@ export function defineStep(firstArg: TPattern, secondArg: IStepOptions | TCallba
     }
 
     const expression = stepExpressionFactory(firstArg);
-    stepDefinitions.set(firstArg, { pattern: firstArg, options: secondArg, cb: thirdArg, expression });
+    stepDefinitions.set(firstArg, { pattern: firstArg, options: secondArg, cb: thirdArg, expression, filePath: getExecutionFileName() });
 }
 
 export function findStepDefinition(step: string) {

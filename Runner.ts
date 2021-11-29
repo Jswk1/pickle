@@ -64,7 +64,7 @@ export default async function execute(initialOptions?: IRunnerOptions) {
             process.exit(featureOutcome.status === OutcomeStatus.Ok ? 0 : 1);
         }
     } catch (ex) {
-        Log.error(ex);
+        Log.error(ex?.stack || ex);
         process.exit(1);
     }
 }

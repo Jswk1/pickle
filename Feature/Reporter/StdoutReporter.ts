@@ -55,7 +55,14 @@ export async function reportFeatureToStdout(featureOutcome: IFeatureOutcome) {
             totalDurationMs += stepOutcome.durationMs;
             count[stepOutcome.status]++;
 
-            Log.info(featureSymbol + "  " + Log.color(stepColor, stepSymbol + "─ " + statusToSymbol(stepOutcome.status) + " " + stepOutcome.step.name) + " " + Log.color(LogColor.Reset, logDuration(stepOutcome.durationMs)));
+            Log.info(featureSymbol
+                + "  "
+                + Log.color(stepColor, stepSymbol + "─ " + statusToSymbol(stepOutcome.status))
+                + " "
+                + Log.color(LogColor.FgBlue, stepOutcome.step.keyword)
+                + " " + Log.color(stepColor, stepOutcome.step.name)
+                + " " + Log.color(LogColor.FgYellow, logDuration(stepOutcome.durationMs))
+                + " " + Log.color(LogColor.FgWhite, stepOutcome.step.definition.filePath));
 
             if (stepOutcome.status === OutcomeStatus.Error) {
                 for (const stack of stepOutcome.error.stack.split("\n"))
