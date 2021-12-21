@@ -93,7 +93,7 @@ export async function executeFeature(feature: IFeature) {
         for (let j = 0; j < stepList.length; j++) {
             const step = stepList[j];
 
-            console.log("Executing - Scenario: " + scenario.name + ` Step (${j + 1}/${stepList.length - 1}): ` + step.name);
+            console.log("Executing - Scenario: " + scenario.name + ` Step (${j + 1}/${stepList.length}): ` + step.name);
 
             if (typeof beforeStepFn === "function")
                 await beforeStepFn(scenario, step);
