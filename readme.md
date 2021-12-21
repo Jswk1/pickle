@@ -1,3 +1,5 @@
+[![Build Status](https://app.travis-ci.com/Jswk1/pickle.svg?branch=master)](https://app.travis-ci.com/Jswk1/pickle)
+
 
 # About
 
