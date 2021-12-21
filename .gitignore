@@ -3,7 +3,6 @@ node_modules
 *.js.map
 *.d.ts
 !bin/**/*
-package-lock.json
 tsconfig.tsbuildinfo
 !/Debugger/Public/**/*
 .vscode
