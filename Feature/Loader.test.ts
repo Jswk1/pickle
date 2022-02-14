@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { And, Given, Then, When } from "../Runner";
-import { StepType } from "../Step/Step";
+import { loadStepDefinitions, StepType } from "../Step/Step";
 import { loadFeature } from "./Loader";
 
 describe("loadFeature", () => {
@@ -43,6 +43,8 @@ describe("loadFeature", () => {
     And("everything works correctly", async () => { });
     When("we add {int} plus {int}", async (a: number, b: number) => { });
     Then("we get {int}", async (c: number) => { });
+
+    loadStepDefinitions();
 
     it("should load the feature", () => {
         const feature = loadFeature(featureContent);

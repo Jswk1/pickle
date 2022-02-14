@@ -46,22 +46,35 @@ export interface IStep {
 
 export const stepDefinitions = new Map<string | RegExp, IStepDefinition>();
 
+type TStepDefFn = () => void;
+const stepDefinitionQueue: Array<TStepDefFn> = [];
+
+export function loadStepDefinitions() {
+    let fn: TStepDefFn;
+
+    while (fn = stepDefinitionQueue.shift()) {
+        fn();
+    }
+}
+
 export function defineStep(pattern: string, cb: TCallbackFuntion): void;
 export function defineStep(regexp: RegExp, cb: TCallbackFuntion): void;
 export function defineStep(pattern: string, options: IStepOptions, cb?: TCallbackFuntion): void;
 export function defineStep(regexp: RegExp, options: IStepOptions, cb?: TCallbackFuntion): void;
 export function defineStep(firstArg: TPattern, secondArg: IStepOptions | TCallbackFuntion, thirdArg?: TCallbackFuntion): void;
 export function defineStep(firstArg: TPattern, secondArg: IStepOptions | TCallbackFuntion, thirdArg?: TCallbackFuntion) {
-    if (stepDefinitions.has(firstArg))
-        throw new Error(`Step '${firstArg}' is defined multiple times.`);
+    stepDefinitionQueue.push(() => {
+        if (stepDefinitions.has(firstArg))
+            throw new Error(`Step '${firstArg}' is defined multiple times.`);
 
-    if (typeof secondArg === "function") {
-        thirdArg = secondArg;
-        secondArg = <IStepOptions>{ timeout: 10000 };
-    }
+        if (typeof secondArg === "function") {
+            thirdArg = secondArg;
+            secondArg = <IStepOptions>{ timeout: 10000 };
+        }
 
-    const expression = stepExpressionFactory(firstArg);
-    stepDefinitions.set(firstArg, { pattern: firstArg, options: secondArg, cb: thirdArg, expression, filePath: getExecutionFileName() });
+        const expression = stepExpressionFactory(firstArg);
+        stepDefinitions.set(firstArg, { pattern: firstArg, options: secondArg, cb: thirdArg, expression, filePath: getExecutionFileName() });
+    });
 }
 
 export function findStepDefinition(step: string) {

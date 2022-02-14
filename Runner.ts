@@ -9,7 +9,7 @@ import { queryFilesByGlob } from "./Utils/QueryFiles";
 import { Log } from "./Utils/Log";
 import { ReporterType, reportFeature } from "./Feature/Reporter/Factory";
 import { startDebugger } from "./Debugger/Server";
-import { stepDefinitions } from "./Step/Step";
+import { loadStepDefinitions, stepDefinitions } from "./Step/Step";
 import { IRunnerOptions, parseArgs } from "./Options";
 
 export function requireScripts(fileNames: string[]) {
@@ -27,6 +27,8 @@ export function requireScripts(fileNames: string[]) {
 
     for (const filePath of fullPaths)
         require(filePath);
+
+    loadStepDefinitions();
 }
 
 export default async function execute(initialOptions?: IRunnerOptions) {
