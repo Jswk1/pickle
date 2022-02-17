@@ -1,8 +1,8 @@
 import { argv } from "process";
 
 export interface IRunnerOptions {
-    scriptsPath: string;
-    featurePath: string;
+    scriptsPath?: string;
+    featurePath?: string;
     jUnitXmlOutputPath?: string;
     logOutputPath?: string;
     debug?: boolean;
@@ -10,6 +10,8 @@ export interface IRunnerOptions {
 
     featureFullPath?: string;
     requiredFilePaths?: string[];
+
+    killOnFinish?: boolean;
 }
 
 export function parseArgs(): IRunnerOptions {
@@ -50,6 +52,9 @@ export function parseArgs(): IRunnerOptions {
                     options.debugPort = Number(nextArg);
 
                 options.debug = true;
+                break;
+            case "--dont-kill":
+                options.killOnFinish = false;
                 break;
         }
     }

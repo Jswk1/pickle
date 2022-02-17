@@ -31,9 +31,9 @@ export function requireScripts(fileNames: string[]) {
     loadStepDefinitions();
 }
 
-export default async function execute(initialOptions?: IRunnerOptions) {
+export default async function execute(initialOptions: IRunnerOptions = { killOnFinish: true }) {
     try {
-        const options = initialOptions || parseArgs();
+        const options = Object.assign({}, initialOptions, parseArgs());
 
         if (!options.logOutputPath)
             options.logOutputPath = "./Log/Log.log";
@@ -63,7 +63,8 @@ export default async function execute(initialOptions?: IRunnerOptions) {
             if (options.logOutputPath)
                 await Log.save(options.logOutputPath);
 
-            process.exit(featureOutcome.status === OutcomeStatus.Ok ? 0 : 1);
+            if (options.killOnFinish)
+                process.exit(featureOutcome.status === OutcomeStatus.Ok ? 0 : 1);
         }
     } catch (ex) {
         Log.error(ex?.stack || ex);
