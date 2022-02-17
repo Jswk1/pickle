@@ -33,7 +33,7 @@ defineExpression({
 
 defineExpression({
     key: "string",
-    pattern: /\"(.*)\"/,
+    pattern: /(?:'|")(.*?)(?:'|")/,
     parser: v => String(v)
 });
 

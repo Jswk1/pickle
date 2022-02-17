@@ -78,12 +78,18 @@ export function defineStep(firstArg: TPattern, secondArg: IStepOptions | TCallba
 }
 
 export function findStepDefinition(step: string) {
-    const stepDef = Array.from(stepDefinitions.values()).find(e => e.expression.regexp.test(step));
+    let stepDefs = Array.from(stepDefinitions.values()).filter(e => e.expression.regexp.test(step));
 
-    if (!stepDef)
+    if (!stepDefs.length)
         throw new Error(`Unsupported step '${step}'`);
 
-    return stepDef;
+    if (stepDefs.length === 1)
+        return stepDefs[0];
+
+    // Try to find the most accurate step definition
+    stepDefs = stepDefs.sort((a, b) => b.expression.parsers.length - a.expression.parsers.length);
+
+    return stepDefs[0];
 }
 
 export const Given = defineStep;

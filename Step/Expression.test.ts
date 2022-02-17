@@ -20,11 +20,11 @@ describe("Step Expression Tests", () => {
             expect(out1.parsers.length).to.be.equal(1);
 
             const out2 = expressionFromString("Then The result of this test will be {string}.");
-            expect(out2.regexp.toString()).to.be.equal("/^Then The result of this test will be (?:\\\"(.*)\\\")\\.$/");
+            expect(out2.regexp.toString()).to.be.equal("/^Then The result of this test will be (?:(?:'|\")(.*?)(?:'|\"))\\.$/");
             expect(out2.parsers.length).to.be.equal(1);
 
             const out3 = expressionFromString("Step {int} with {decimal} many {string} expressions.");
-            expect(out3.regexp.toString()).to.be.equal("/^Step (\\\-?\\\d*) with (\\\-?\\\d*\\\.?\\\d*) many (?:\\\"(.*)\\\") expressions\\.$/");
+            expect(out3.regexp.toString()).to.be.equal("/^Step (\\\-?\\\d*) with (\\\-?\\\d*\\\.?\\\d*) many (?:(?:'|\")(.*?)(?:'|\")) expressions\\.$/");
             expect(out3.parsers.length).to.be.equal(3);
         });
     });
@@ -50,7 +50,7 @@ describe("Step Expression Tests", () => {
             expect(extractVariables({ id: 0, keyword: "when", type: StepType.Scenario, name: "Number 10 divided by 2.5 gives 4", definition: definition1 })).to.eql([10, 2.5, 4]);
         });
 
-        it("should should extract strings", () => {
+        it("should should extract strings in double quotation", () => {
             const description1 = "Someone once said {string} and then {string}.";
             defineStep(description1, () => undefined);
             loadStepDefinitions();
@@ -58,6 +58,26 @@ describe("Step Expression Tests", () => {
             const definition1 = stepDefinitions.get(description1);
 
             expect(extractVariables({ id: 0, keyword: "when", type: StepType.Scenario, name: `Someone once said "To be or not to be" and then "that is "the" question".`, definition: definition1 })).to.eql(["To be or not to be", `that is "the" question`]);
+        });
+
+        it("should should extract strings in single quotation", () => {
+            const description1 = "This string will contain {string} quotation.";
+            defineStep(description1, () => undefined);
+            loadStepDefinitions();
+
+            const definition1 = stepDefinitions.get(description1);
+
+            expect(extractVariables({ id: 0, keyword: "when", type: StepType.Scenario, name: `This string will contain 'single' quotation.`, definition: definition1 })).to.eql(["single"]);
+        });
+
+        it("should should extract strings in single and double quotation", () => {
+            const description1 = "This string will contain {string} and {string} quotation.";
+            defineStep(description1, () => undefined);
+            loadStepDefinitions();
+
+            const definition1 = stepDefinitions.get(description1);
+
+            expect(extractVariables({ id: 0, keyword: "when", type: StepType.Scenario, name: `This string will contain 'single' and "double" quotation.`, definition: definition1 })).to.eql(["single", "double"]);
         });
 
         it("should should extract multiple types", () => {
