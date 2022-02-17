@@ -4,6 +4,14 @@
   "description": "",
   "main": "Runner.js",
   "types": "Runner.d.ts",
+  "keywords": [
+    "test",
+    "library",
+    "debug",
+    "MIT",
+    "behavior",
+    "test case"
+  ],
   "scripts": {
     "prepublish": "tsc",
     "test": "mocha './{,!(node_modules)/**/}*.test.js' --recursive --reporter spec"
