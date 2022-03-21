@@ -22,6 +22,11 @@ export function startDebugger(port = 3001, feature: IFeature, options: IRunnerOp
     });
 
     server.listen(port, () => {
-        Log.info(`Navigate to http://localhost:${port}/`);
+        const url = `http://localhost:${port}/`;
+        Log.info(`Debugger running on ${url}`);
+
+        // https://stackoverflow.com/a/49013356
+        const start = (process.platform == "darwin" ? "open" : process.platform == "win32" ? "start" : "xdg-open");
+        require("child_process").exec(start + ' ' + url);
     });
 }
