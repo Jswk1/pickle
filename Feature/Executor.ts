@@ -38,7 +38,7 @@ async function runWithTimeout(timeoutMS: number, runFn: () => Promise<any>, onTi
     });
 }
 
-export async function executeStep(step: IStep, context: TContext) {
+export async function executeStep(scenario: IScenario, step: IStep, context: TContext) {
     const variables = extractVariables(step);
 
     const stepOutcome: IStepOutcome = {
@@ -51,6 +51,9 @@ export async function executeStep(step: IStep, context: TContext) {
 
     const startTime = performance.now();
     try {
+        if (typeof beforeStepFn === "function")
+            await beforeStepFn(scenario, step);
+
         await runWithTimeout(timeout, async () => {
             await step.definition.cb.call(context, ...variables);
         }, `Timeout after ${timeout} milliseconds.`);
@@ -60,6 +63,10 @@ export async function executeStep(step: IStep, context: TContext) {
     } finally {
         const finishTime = performance.now();
         stepOutcome.durationMs = Math.round(finishTime - startTime);
+
+        if (typeof afterStepFn === "function")
+            await afterStepFn(scenario, step, stepOutcome);
+
         return stepOutcome;
     }
 }
@@ -95,14 +102,8 @@ export async function executeFeature(feature: IFeature) {
 
             console.log("Executing - Scenario: " + scenario.name + ` Step (${j + 1}/${stepList.length}): ` + step.name);
 
-            if (typeof beforeStepFn === "function")
-                await beforeStepFn(scenario, step);
-
-            const stepOutcome = await executeStep(step, context);
+            const stepOutcome = await executeStep(scenario, step, context);
             scenarioOutcome.stepOutcomes.push(stepOutcome);
-
-            if (typeof afterStepFn === "function")
-                await afterStepFn(scenario, step, stepOutcome);
 
             if (stepOutcome.status === OutcomeStatus.Error) {
                 featureOutcome.status = scenarioOutcome.status = OutcomeStatus.Error;

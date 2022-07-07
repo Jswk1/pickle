@@ -61,7 +61,7 @@ export function getApiRouter(feature: IFeature, options: IRunnerOptions) {
             return res.sendStatus(404);
 
         try {
-            const stepOutcome = await executeStep(step, context);
+            const stepOutcome = await executeStep(scenario, step, context);
 
             if (stepOutcome.error)
                 console.log(stepOutcome.error);

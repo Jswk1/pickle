@@ -1,5 +1,6 @@
 import { expect } from "chai";
-import { Given, Then, When } from "../Runner";
+import { beforeStep, Given, Then, When } from "../Runner";
+import { afterStep, loadStepDefinitions } from "../Step/Step";
 import { executeFeature, executeStep, OutcomeStatus } from "./Executor";
 import { loadFeature } from "./Loader";
 
@@ -21,6 +22,9 @@ describe("executor tests", async () => {
         Scenario: Third Scenario
             When "third" scenario is tested
             Then it will timeout
+
+        Scenario: Fourth Scenario
+            When "fourth" scenario is tested
     `;
 
     Given("initial data", { timeout: 1000 }, function () {
@@ -47,20 +51,54 @@ describe("executor tests", async () => {
         await new Promise((resolve) => setTimeout(resolve, 100));
     });
 
+    loadStepDefinitions();
+
     const feature = loadFeature(featureContent);
 
     describe("executeStep", () => {
         it("should execute steps individually", async () => {
             // First scenario -> Then it is completed succesfully
-            const outcome1 = await executeStep(feature.scenarios[0].steps[1], { variables: { scenario: "first" } });
+            const outcome1 = await executeStep(feature.scenarios[0], feature.scenarios[0].steps[1], { variables: { scenario: "first" } });
             expect(outcome1.step.name).to.be.equal("it is completed succesfully");
             expect(outcome1.status).to.be.equal(OutcomeStatus.Ok);
 
             // Second scenario -> Then it will fail
-            const outcome2 = await executeStep(feature.scenarios[1].steps[1], { variables: {} });
+            const outcome2 = await executeStep(feature.scenarios[1], feature.scenarios[1].steps[1], { variables: {} });
             expect(outcome2.step.name).to.be.equal("it will fail");
             expect(outcome2.status).to.be.equal(OutcomeStatus.Error);
             expect(outcome2.error.message).to.be.equal("It failed.");
+        });
+
+        it("should run beforeStep hook", async () => {
+            beforeStep((scenario, step) => {
+                throw new Error("boom");
+            });
+
+            // Fourth scenario -> It will explode due to beforeStep hook
+            const outcome1 = await executeStep(feature.scenarios[3], feature.scenarios[3].steps[0], { variables: { scenario: "fourth" } });
+            expect(outcome1.step.name).to.be.equal('"fourth" scenario is tested');
+            expect(outcome1.status).to.be.equal(OutcomeStatus.Error);
+
+            beforeStep(null);
+        });
+
+        it("should run afterStep hook", async () => {
+            beforeStep((scenario, step) => {
+                throw new Error("boom");
+            });
+
+            afterStep((scenario, step, outcome) => {
+                outcome.status = OutcomeStatus.Ok;
+            });
+
+            // Fourth scenario -> It will explode due to beforeStep hook but it will be updated to OK in afterStep
+            const outcome1 = await executeStep(feature.scenarios[3], feature.scenarios[3].steps[0], { variables: { scenario: "fourth" } });
+
+            expect(outcome1.step.name).to.be.equal('"fourth" scenario is tested');
+            expect(outcome1.status).to.be.equal(OutcomeStatus.Ok);
+
+            beforeStep(null);
+            afterStep(null);
         });
     });
 
