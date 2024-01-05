@@ -1,12 +1,12 @@
 import * as Express from "express";
 import { executeStep } from "../Feature/Executor";
-import { IFeature, loadFeature, loadFeatureFile, resetId } from "../Feature/Loader";
+import { resetId } from "../Feature/Loader";
 import { IRunnerOptions } from "../Options";
-import { requireScripts } from "../Runner";
+import { feature, initFeature, requireScripts } from "../Runner";
 import { IStep } from "../Step/Step";
 import { queryFilesByGlob } from "../Utils/QueryFiles";
 
-export function getApiRouter(feature: IFeature, options: IRunnerOptions) {
+export function getApiRouter(options: IRunnerOptions) {
     const router = Express.Router();
     const context = { variables: {} };
 
@@ -23,8 +23,8 @@ export function getApiRouter(feature: IFeature, options: IRunnerOptions) {
 
         requireScripts(stepDefinitionNames);
         resetId();
-        const featureFileContent = await loadFeatureFile(options.featureFullPath);
-        feature = loadFeature(featureFileContent);
+
+        await initFeature(options);
         res.sendStatus(200);
     });
 

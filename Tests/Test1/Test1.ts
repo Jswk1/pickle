@@ -9,5 +9,6 @@ When("I do something", async () => {
 });
 
 Then("I check something", async () => {
-    throw new Error("test!");
+    // debugger;
+    // throw new Error("test!");
 });

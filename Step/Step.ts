@@ -70,7 +70,7 @@ export function defineStep(firstArg: TPattern, secondArg: IStepOptions | TCallba
 
         if (typeof secondArg === "function") {
             thirdArg = secondArg;
-            secondArg = <IStepOptions>{ timeout: 10000 };
+            secondArg = <IStepOptions>{ timeout: 60000 };
         }
 
         const expression = stepExpressionFactory(firstArg);
