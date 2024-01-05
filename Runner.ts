@@ -4,7 +4,7 @@ import "./Step/Expression";
 import "./Step/Step";
 import "./Utils/Array";
 import { executeFeature, OutcomeStatus } from "./Feature/Executor";
-import { loadFeature, loadFeatureFile } from "./Feature/Loader";
+import { IFeature, loadFeature, loadFeatureFile } from "./Feature/Loader";
 import { queryFilesByGlob } from "./Utils/QueryFiles";
 import { Log } from "./Utils/Log";
 import { ReporterType, reportFeature } from "./Feature/Reporter/Factory";
@@ -13,7 +13,7 @@ import { loadStepDefinitions, stepDefinitions } from "./Step/Step";
 import { IRunnerOptions, parseArgs } from "./Options";
 
 export function requireScripts(fileNames: string[]) {
-    stepDefinitions.clear();
+    // stepDefinitions.clear();
 
     const executionDirectory = process.cwd();
     const fullPaths = fileNames.map(e => Path.isAbsolute(e) ? e : Path.join(executionDirectory, e));
@@ -31,6 +31,13 @@ export function requireScripts(fileNames: string[]) {
     loadStepDefinitions();
 }
 
+export let feature: IFeature;
+
+export async function initFeature(options: IRunnerOptions) {
+    const featureFileContent = await loadFeatureFile(options.featureFullPath);
+    feature = loadFeature(featureFileContent);
+}
+
 export default async function execute(initialOptions: IRunnerOptions = { killOnFinish: true }) {
     try {
         const options = Object.assign({}, initialOptions, parseArgs());
@@ -46,8 +53,7 @@ export default async function execute(initialOptions: IRunnerOptions = { killOnF
         const featureFullPath = Path.isAbsolute(options.featurePath) ? options.featurePath : Path.join(process.cwd(), options.featurePath);
         options.featureFullPath = featureFullPath;
 
-        const fileContent = await loadFeatureFile(featureFullPath);
-        const feature = loadFeature(fileContent);
+        await initFeature(options);
 
         if (options.debug) {
             startDebugger(options.debugPort || 3001, feature, options);

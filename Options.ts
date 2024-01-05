@@ -7,9 +7,10 @@ export interface IRunnerOptions {
     logOutputPath?: string;
     debug?: boolean;
     debugPort?: number;
+    watchForChanges?: boolean;
+    warnForDuplicatedSteps?: boolean;
 
     featureFullPath?: string;
-    requiredFilePaths?: string[];
 
     killOnFinish?: boolean;
 }
@@ -53,8 +54,22 @@ export function parseArgs(): IRunnerOptions {
 
                 options.debug = true;
                 break;
+
+            case "-w":
+                options.watchForChanges = true;
+                break;
+
             case "--dont-kill":
                 options.killOnFinish = false;
+                break;
+
+            case "--duplicate-warn":
+                options.warnForDuplicatedSteps = true;
+                break;
+            case "--trace-size":
+                if (!nextArg?.length)
+                    throw new Error(`[Arg '${arg}'] Expected trace size.`);
+                Error.stackTraceLimit = Number(nextArg);
                 break;
         }
     }

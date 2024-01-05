@@ -54,7 +54,7 @@ export function extractEntryDirectory(globPattern: string) {
     const entryPath: string[] = [];
 
     for (const part of parts) {
-        if (["*", "?"].some(e => part.indexOf(e) !== -1))
+        if (["*", "?"].some(e => part.includes(e)))
             break;
 
         entryPath.push(part);
@@ -71,12 +71,12 @@ export function extractEntryDirectory(globPattern: string) {
     return finalPath;
 }
 
-function toPosix(path: string) {
+export function toPosix(path: string) {
     return path.split(Path.sep).join(Path.posix.sep);
 }
 
 export async function queryFilesByGlob(path: string) {
-    const entryPoint = Path.isAbsolute(path) ? path : extractEntryDirectory(path);
+    const entryPoint = extractEntryDirectory(path);
     const regexp = createRegexFromPattern(toPosix(path));
     const allFilePaths = await FsAsync.deepReaddir(entryPoint);
     const filteredFilePaths = allFilePaths.filter(e => regexp.test(e));

@@ -100,6 +100,7 @@ Parameters:
 *  `-j <xml_path>` `--junit <xml_path>` - Path to save the JUnit xml with test execution summary
 *  `-o <log_path>` `--output <log_path>` - Path to save the test execution log
 *  `-d` `--debug` - Execute test in debug mode. For details please take a look a the `Debugger` section.
+*  `--trace-size <number>` - Increase the error stack trace size. Default is 20.
 
 Examples:
 
