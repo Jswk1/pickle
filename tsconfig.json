@@ -5,10 +5,9 @@
         "sourceMap": true,
         "experimentalDecorators": true,
         "noImplicitReturns": true,
-        "declaration": true,
+        "declaration": false,
         "noImplicitThis": true,
         "strictFunctionTypes": true,
-        "keyofStringsOnly": true,
         "incremental": true,
         "allowSyntheticDefaultImports": true
     },

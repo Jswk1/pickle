@@ -1,5 +1,6 @@
 import { IFeatureOutcome, IScenarioOutcome, IStepOutcome } from "../Feature/Executor";
 import { IFeature, IScenario } from "../Feature/Loader";
+import { Log } from "../Utils/Log";
 import { getExecutionFileName } from "../Utils/Trace";
 import { IStepExpression, stepExpressionFactory } from "./Expression";
 
@@ -65,7 +66,7 @@ export function defineStep(firstArg: TPattern, secondArg: IStepOptions | TCallba
 export function defineStep(firstArg: TPattern, secondArg: IStepOptions | TCallbackFuntion, thirdArg?: TCallbackFuntion) {
     stepDefinitionQueue.push(() => {
         if (stepDefinitions.has(firstArg))
-            throw new Error(`Step '${firstArg}' is defined multiple times.`);
+            Log.warn(`Step '${firstArg}' is defined multiple times.`);
 
         if (typeof secondArg === "function") {
             thirdArg = secondArg;
