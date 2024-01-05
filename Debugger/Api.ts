@@ -64,11 +64,11 @@ export function getApiRouter(feature: IFeature, options: IRunnerOptions) {
             const stepOutcome = await executeStep(scenario, step, context);
 
             if (stepOutcome.error)
-                console.log(stepOutcome.error);
+                console.error(stepOutcome.error);
 
             return res.send({ status: stepOutcome.status, error: stepOutcome.error?.stack || stepOutcome.error?.message });
         } catch (ex) {
-            console.log(ex);
+            console.error(ex);
             return res.status(500).send(ex);
         }
     });

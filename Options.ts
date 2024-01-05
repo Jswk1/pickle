@@ -56,6 +56,12 @@ export function parseArgs(): IRunnerOptions {
             case "--dont-kill":
                 options.killOnFinish = false;
                 break;
+
+            case "--trace-size":
+                if (!nextArg?.length)
+                    throw new Error(`[Arg '${arg}'] Expected trace size.`);
+                Error.stackTraceLimit = Number(nextArg);
+                break;
         }
     }
 
