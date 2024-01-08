@@ -4,6 +4,7 @@ export interface IRunnerOptions {
     scriptsPath?: string;
     featurePath?: string;
     jUnitXmlOutputPath?: string;
+    bridgeJSONOutputPath?: string;
     logOutputPath?: string;
     debug?: boolean;
     debugPort?: number;
@@ -36,7 +37,7 @@ export function parseArgs(): IRunnerOptions {
             case "-j":
             case "--junit":
                 if (!nextArg?.length)
-                    throw new Error(`[Arg '${arg}'] Expected output xml path.`);
+                    throw new Error(`[Arg '${arg}'] Expected output file path.`);
 
                 options.jUnitXmlOutputPath = nextArg;
                 break;
@@ -46,6 +47,12 @@ export function parseArgs(): IRunnerOptions {
                     throw new Error(`[Arg '${arg}'] Expected output log path.`);
 
                 options.logOutputPath = nextArg;
+                break;
+            case "--bridge-json":
+                if (!nextArg?.length)
+                    throw new Error(`[Arg '${arg}'] Expected output file path.`);
+
+                options.bridgeJSONOutputPath = nextArg;
                 break;
             case "-d":
             case "--debug":
