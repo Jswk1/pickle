@@ -66,6 +66,9 @@ export default async function execute(initialOptions: IRunnerOptions = { killOnF
             if (options.jUnitXmlOutputPath)
                 await reportFeature(ReporterType.JUnit, featureOutcome, options);
 
+            if (options.bridgeJSONOutputPath)
+                await reportFeature(ReporterType.BridgeJSON, featureOutcome, options);
+
             if (options.logOutputPath)
                 await Log.save(options.logOutputPath);
 

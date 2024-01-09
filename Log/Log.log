@@ -1,0 +1,11 @@
+2024-01-09T10:23:37.719Z: 1 files loaded.
+2024-01-09T10:23:37.731Z: Feature: TestFeature
+2024-01-09T10:23:37.731Z: │
+2024-01-09T10:23:37.732Z: └─ ✔ Scenario: TestScenario
+2024-01-09T10:23:37.732Z:    ├─ ✔ Given Something 3ms C:\Work\pickle\Step\Step.ts:57:9
+2024-01-09T10:23:37.732Z:    ├─ ✔ When I do something 0ms C:\Work\pickle\Step\Step.ts:57:9
+2024-01-09T10:23:37.733Z:    └─ ✔ Then I check something 0ms C:\Work\pickle\Step\Step.ts:57:9
+2024-01-09T10:23:37.733Z: ___________________________
+2024-01-09T10:23:37.733Z: Test result: 3/3 (100%) 3ms
+2024-01-09T10:23:37.735Z: Writing BridgeJSON output to: Bridge.json
+2024-01-09T10:23:37.740Z: Writing log output to: ./Log/Log.log

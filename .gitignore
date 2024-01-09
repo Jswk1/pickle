@@ -6,3 +6,4 @@ node_modules
 tsconfig.tsbuildinfo
 !/Debugger/Public/**/*
 .vscode
+!/.vscode/launch.json

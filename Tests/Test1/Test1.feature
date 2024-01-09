@@ -1,4 +1,6 @@
 Feature: TestFeature
+    Test description blabla
+    
     Background:
         Given Something
 

@@ -21,7 +21,8 @@ export interface IScenarioReport {
 export interface IFeatureReport {
     name: string;
     description: string;
-    featureFileContent: string
+    featureFileContent: string;
+    featureFullPath: string;
     statusCount: {
         ok: number,
         error: number,
@@ -47,6 +48,7 @@ export async function reportFeatureToBridgeJSON(featureOutcome: IFeatureOutcome,
         name: featureOutcome.feature.name,
         description: featureOutcome.feature.description,
         featureFileContent: featureContent,
+        featureFullPath: options.featurePath,
         statusCount: {
             ok: 0,
             error: 0,
@@ -74,7 +76,7 @@ export async function reportFeatureToBridgeJSON(featureOutcome: IFeatureOutcome,
                 status: stepOutcome.status,
                 filePath: stepOutcome.step.definition.filePath,
                 durationMs: stepOutcome.durationMs,
-                errorStack: stepOutcome.error.stack
+                errorStack: stepOutcome.error?.stack
             }
 
             if (stepOutcome.status === OutcomeStatus.Error)
@@ -93,7 +95,7 @@ export async function reportFeatureToBridgeJSON(featureOutcome: IFeatureOutcome,
         skipped: count[OutcomeStatus.Skipped]
     }
 
-    const json = JSON.stringify(report);
+    const json = JSON.stringify(report, undefined, 4);
     const outFullPath = Path.normalize(options.bridgeJSONOutputPath);
 
     Log.info(`Writing BridgeJSON output to: ${outFullPath}`);

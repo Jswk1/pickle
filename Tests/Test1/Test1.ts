@@ -9,5 +9,4 @@ When("I do something", async function () {
 });
 
 Then("I check something", async function () {
-
 });
