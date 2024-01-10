@@ -21,7 +21,7 @@ export function getApiRouter(options: IRunnerOptions) {
     router.post("/reload", async (req, res) => {
         const stepDefinitionNames = await queryFilesByGlob(options.scriptsPath);
 
-        requireScripts(stepDefinitionNames);
+        requireScripts(options, stepDefinitionNames);
         resetId();
 
         await initFeature(options);

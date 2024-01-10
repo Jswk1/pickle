@@ -9,7 +9,7 @@ describe("Step Tests", () => {
             defineStep("we have {string} and {string} and {string}", async (str1: string, str2: string, str3: string) => { });
             defineStep("we have {string} and number {int}", async (str1: string, num: number) => { });
 
-            loadStepDefinitions();
+            loadStepDefinitions({});
 
             const def1 = findStepDefinition(`we have "string"`);
             const def2 = findStepDefinition(`we have "string" and "some other string"`);

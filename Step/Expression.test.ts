@@ -33,7 +33,7 @@ describe("Step Expression Tests", () => {
         it("should should extract integers", () => {
             const description1 = "Step {int} with {int} integers.";
             defineStep(description1, () => undefined);
-            loadStepDefinitions();
+            loadStepDefinitions({});
 
             const definition1 = stepDefinitions.get(description1);
 
@@ -43,7 +43,7 @@ describe("Step Expression Tests", () => {
         it("should should extract decimals", () => {
             const description1 = "Number {decimal} divided by {decimal} gives {decimal}";
             defineStep(description1, () => undefined);
-            loadStepDefinitions();
+            loadStepDefinitions({});
 
             const definition1 = stepDefinitions.get(description1);
 
@@ -53,7 +53,7 @@ describe("Step Expression Tests", () => {
         it("should should extract strings in double quotation", () => {
             const description1 = "Someone once said {string} and then {string}.";
             defineStep(description1, () => undefined);
-            loadStepDefinitions();
+            loadStepDefinitions({});
 
             const definition1 = stepDefinitions.get(description1);
 
@@ -63,7 +63,7 @@ describe("Step Expression Tests", () => {
         it("should should extract strings in single quotation", () => {
             const description1 = "This string will contain {string} quotation.";
             defineStep(description1, () => undefined);
-            loadStepDefinitions();
+            loadStepDefinitions({});
 
             const definition1 = stepDefinitions.get(description1);
 
@@ -73,7 +73,7 @@ describe("Step Expression Tests", () => {
         it("should should extract strings in single and double quotation", () => {
             const description1 = "This string will contain {string} and {string} quotation.";
             defineStep(description1, () => undefined);
-            loadStepDefinitions();
+            loadStepDefinitions({});
 
             const definition1 = stepDefinitions.get(description1);
 
@@ -83,7 +83,7 @@ describe("Step Expression Tests", () => {
         it("should should extract multiple types", () => {
             const description1 = "Step with integer {int} and decimal {decimal} with string {string} included.";
             defineStep(description1, () => undefined);
-            loadStepDefinitions();
+            loadStepDefinitions({});
 
             const definition1 = stepDefinitions.get(description1);
 
@@ -93,7 +93,7 @@ describe("Step Expression Tests", () => {
         it("should should extract capturing groups from regexp", () => {
             const description1 = /This step has uses ([a-z]+) to extract variables\. It is working ([A-Z]+) and it should find (\d) groups\!/;
             defineStep(description1, () => undefined);
-            loadStepDefinitions();
+            loadStepDefinitions({});
 
             const definition1 = stepDefinitions.get(description1);
 

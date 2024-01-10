@@ -1,5 +1,6 @@
 import { IFeatureOutcome, IScenarioOutcome, IStepOutcome } from "../Feature/Executor";
 import { IFeature, IScenario } from "../Feature/Loader";
+import { IRunnerOptions } from "../Options";
 import { Log } from "../Utils/Log";
 import { getExecutionFileName } from "../Utils/Trace";
 import { IStepExpression, stepExpressionFactory } from "./Expression";
@@ -47,14 +48,15 @@ export interface IStep {
 
 export const stepDefinitions = new Map<string | RegExp, IStepDefinition>();
 
-type TStepDefFn = () => void;
+type TStepDefFn = (options: IRunnerOptions) => { pattern: TPattern, definition: IStepDefinition };
 const stepDefinitionQueue: Array<TStepDefFn> = [];
 
-export function loadStepDefinitions() {
+export function loadStepDefinitions(options: IRunnerOptions) {
     let fn: TStepDefFn;
 
     while (fn = stepDefinitionQueue.shift()) {
-        fn();
+        const { pattern, definition } = fn(options);
+        stepDefinitions.set(pattern, definition);
     }
 }
 
@@ -64,8 +66,9 @@ export function defineStep(pattern: string, options: IStepOptions, cb?: TCallbac
 export function defineStep(regexp: RegExp, options: IStepOptions, cb?: TCallbackFuntion): void;
 export function defineStep(firstArg: TPattern, secondArg: IStepOptions | TCallbackFuntion, thirdArg?: TCallbackFuntion): void;
 export function defineStep(firstArg: TPattern, secondArg: IStepOptions | TCallbackFuntion, thirdArg?: TCallbackFuntion) {
-    stepDefinitionQueue.push(() => {
-        if (stepDefinitions.has(firstArg))
+    const filePath = getExecutionFileName();
+    stepDefinitionQueue.push((options: IRunnerOptions) => {
+        if (options.warnForDuplicatedSteps && stepDefinitions.has(firstArg))
             Log.warn(`Step '${firstArg}' is defined multiple times.`);
 
         if (typeof secondArg === "function") {
@@ -74,7 +77,11 @@ export function defineStep(firstArg: TPattern, secondArg: IStepOptions | TCallba
         }
 
         const expression = stepExpressionFactory(firstArg);
-        stepDefinitions.set(firstArg, { pattern: firstArg, options: secondArg, cb: thirdArg, expression, filePath: getExecutionFileName() });
+
+        return {
+            pattern: firstArg,
+            definition: { pattern: firstArg, options: secondArg, cb: thirdArg, expression, filePath }
+        }
     });
 }
 

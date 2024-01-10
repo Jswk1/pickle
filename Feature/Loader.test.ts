@@ -44,7 +44,7 @@ describe("loadFeature", () => {
     When("we add {int} plus {int}", async (a: number, b: number) => { });
     Then("we get {int}", async (c: number) => { });
 
-    loadStepDefinitions();
+    loadStepDefinitions({});
 
     it("should load the feature", () => {
         const feature = loadFeature(featureContent);

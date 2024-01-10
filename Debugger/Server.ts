@@ -43,6 +43,15 @@ function watchForChanges(options: IRunnerOptions) {
     const fileNameRegexp = createRegexFromPattern(toPosix(options.scriptsPath));
     const watcher = Chokidar.watch(pathToWatch);
 
+    const reloadFn = async () => {
+        resetId();
+        loadStepDefinitions(options);
+        await initFeature(options);
+        Log.info(`Test source reloaded.`);
+    }
+
+    let timeout: NodeJS.Timeout;
+
     watcher.on("change", async (changedFilePath, stats) => {
         if (!fileNameRegexp.test(changedFilePath))
             return;
@@ -54,9 +63,9 @@ function watchForChanges(options: IRunnerOptions) {
             delete require.cache[modulePath];
 
         require(modulePath);
-        resetId();
-        loadStepDefinitions();
-        await initFeature(options);
-        Log.info(`Reloading ${modulePath}.`);
+        Log.info(`Reloading file: ${modulePath}`);
+
+        clearTimeout(timeout);
+        timeout = setTimeout(() => reloadFn(), 250);
     });
 }

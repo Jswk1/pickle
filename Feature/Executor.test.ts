@@ -51,7 +51,7 @@ describe("executor tests", async () => {
         await new Promise((resolve) => setTimeout(resolve, 100));
     });
 
-    loadStepDefinitions();
+    loadStepDefinitions({});
 
     const feature = loadFeature(featureContent);
 

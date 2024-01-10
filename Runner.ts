@@ -12,7 +12,7 @@ import { startDebugger } from "./Debugger/Server";
 import { loadStepDefinitions, stepDefinitions } from "./Step/Step";
 import { IRunnerOptions, parseArgs } from "./Options";
 
-export function requireScripts(fileNames: string[]) {
+export function requireScripts(options: IRunnerOptions, fileNames: string[]) {
     // stepDefinitions.clear();
 
     const executionDirectory = process.cwd();
@@ -28,7 +28,7 @@ export function requireScripts(fileNames: string[]) {
     for (const filePath of fullPaths)
         require(filePath);
 
-    loadStepDefinitions();
+    loadStepDefinitions(options);
 }
 
 export let feature: IFeature;
@@ -46,7 +46,7 @@ export default async function execute(initialOptions: IRunnerOptions = { killOnF
             options.logOutputPath = "./Log/Log.log";
 
         const stepDefinitionFileNames = await queryFilesByGlob(options.scriptsPath);
-        requireScripts(stepDefinitionFileNames);
+        requireScripts(options, stepDefinitionFileNames);
 
         Log.info(`${stepDefinitionFileNames.length} files loaded.`);
 
