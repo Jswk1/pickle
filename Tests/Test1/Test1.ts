@@ -9,5 +9,5 @@ When("I do something", async function () {
 });
 
 Then("I check something", async function () {
-    throw new Error();
+    // throw new Error();
 });

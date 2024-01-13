@@ -8,7 +8,6 @@ export interface IRunnerOptions {
     logOutputPath?: string;
     debug?: boolean;
     debugPort?: number;
-    watchForChanges?: boolean;
     warnForDuplicatedSteps?: boolean;
 
     featureFullPath?: string;
@@ -60,10 +59,6 @@ export function parseArgs(): IRunnerOptions {
                     options.debugPort = Number(nextArg);
 
                 options.debug = true;
-                break;
-
-            case "-w":
-                options.watchForChanges = true;
                 break;
 
             case "--dont-kill":

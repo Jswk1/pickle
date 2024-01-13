@@ -5,6 +5,7 @@ import { IRunnerOptions } from "../Options";
 import { feature, initFeature, requireScripts } from "../Runner";
 import { IStep } from "../Step/Step";
 import { queryFilesByGlob } from "../Utils/QueryFiles";
+import { stopWatching, watchForChanges } from "./Watcher";
 
 export function getApiRouter(options: IRunnerOptions) {
     const router = Express.Router();
@@ -25,6 +26,15 @@ export function getApiRouter(options: IRunnerOptions) {
         resetId();
 
         await initFeature(options);
+        res.sendStatus(200);
+    });
+
+    router.post("/reload/watch", async (req: Express.Request<{}, {}, { enable: boolean }>, res) => {
+        if (req.body.enable)
+            watchForChanges(options);
+        else
+            stopWatching();
+
         res.sendStatus(200);
     });
 
