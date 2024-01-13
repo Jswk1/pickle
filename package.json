@@ -14,6 +14,7 @@
   ],
   "scripts": {
     "prepublish": "tsc",
+    "build": "npx tsc",
     "test": "mocha './{,!(node_modules)/**/}*.test.js' --recursive --reporter spec"
   },
   "repository": {
