@@ -5,6 +5,7 @@ export interface IRunnerOptions {
     featurePath?: string;
     jUnitXmlOutputPath?: string;
     bridgeJSONOutputPath?: string;
+    bridgeJSONArea?: string;
     logOutputPath?: string;
     debug?: boolean;
     debugPort?: number;
@@ -53,6 +54,12 @@ export function parseArgs(): IRunnerOptions {
 
                 options.bridgeJSONOutputPath = nextArg;
                 break;
+                case "--bridge-json-area":
+                    if (!nextArg?.length)
+                        throw new Error(`[Arg '${arg}'] Expected area name.`);
+    
+                    options.bridgeJSONArea = nextArg;
+                    break;                
             case "-d":
             case "--debug":
                 if (nextArg && !isNaN(Number(nextArg)))
