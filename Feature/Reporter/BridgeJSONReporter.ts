@@ -20,6 +20,7 @@ export interface IScenarioReport {
 
 export interface IFeatureReport {
     name: string;
+    area: string;
     description: string;
     featureFileContent: string;
     featureFullPath: string;
@@ -46,6 +47,7 @@ export async function reportFeatureToBridgeJSON(featureOutcome: IFeatureOutcome,
 
     const report: IFeatureReport = {
         name: featureOutcome.feature.name,
+        area: options.bridgeJSONArea || "",
         description: featureOutcome.feature.description,
         featureFileContent: featureContent,
         featureFullPath: options.featurePath,
