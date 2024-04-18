@@ -83,7 +83,7 @@ export default async function execute(initialOptions: IRunnerOptions = { killOnF
     }
 }
 
-export async function reloadScripts(path: string) {
+async function reloadScripts(path: string) {
     const stepDefinitionNames = await queryFilesByGlob(path);
 
     requireScripts(options, stepDefinitionNames);
@@ -91,6 +91,7 @@ export async function reloadScripts(path: string) {
 
     await initFeature(options);
 }
-export { execute };
+
+export { execute, reloadScripts };
 export { defineStep, Given, Then, When, And, But, TContext, beforeScenario, afterScenario, beforeFeature, afterFeature, beforeStep, afterStep } from "./Step/Step";
 export { defineExpression } from "./Step/Expression";

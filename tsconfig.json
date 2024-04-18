@@ -5,7 +5,7 @@
         "sourceMap": true,
         "experimentalDecorators": true,
         "noImplicitReturns": true,
-        "declaration": false,
+        "declaration": true,
         "noImplicitThis": true,
         "strictFunctionTypes": true,
         "incremental": true,
