@@ -4,7 +4,7 @@ import "./Step/Expression";
 import "./Step/Step";
 import "./Utils/Array";
 import { executeFeature, OutcomeStatus } from "./Feature/Executor";
-import { IFeature, loadFeature, loadFeatureFile } from "./Feature/Loader";
+import { IFeature, loadFeature, loadFeatureFile, resetId } from "./Feature/Loader";
 import { queryFilesByGlob } from "./Utils/QueryFiles";
 import { Log } from "./Utils/Log";
 import { ReporterType, reportFeature } from "./Feature/Reporter/Factory";
@@ -38,9 +38,11 @@ export async function initFeature(options: IRunnerOptions) {
     feature = loadFeature(featureFileContent);
 }
 
+export let options: IRunnerOptions;
+
 export default async function execute(initialOptions: IRunnerOptions = { killOnFinish: true }) {
     try {
-        const options = Object.assign({}, initialOptions, parseArgs());
+        options = Object.assign({}, initialOptions, parseArgs());
 
         if (!options.logOutputPath)
             options.logOutputPath = "./Log/Log.log";
@@ -81,6 +83,14 @@ export default async function execute(initialOptions: IRunnerOptions = { killOnF
     }
 }
 
+export async function reloadScripts(path: string) {
+    const stepDefinitionNames = await queryFilesByGlob(path);
+
+    requireScripts(options, stepDefinitionNames);
+    resetId();
+
+    await initFeature(options);
+}
 export { execute };
 export { defineStep, Given, Then, When, And, But, TContext, beforeScenario, afterScenario, beforeFeature, afterFeature, beforeStep, afterStep } from "./Step/Step";
 export { defineExpression } from "./Step/Expression";

@@ -2,7 +2,7 @@ import * as Express from "express";
 import { executeStep } from "../Feature/Executor";
 import { resetId } from "../Feature/Loader";
 import { IRunnerOptions } from "../Options";
-import { feature, initFeature, requireScripts } from "../Runner";
+import { feature, initFeature, reloadScripts, requireScripts } from "../Runner";
 import { IStep } from "../Step/Step";
 import { queryFilesByGlob } from "../Utils/QueryFiles";
 import { stopWatching, watchForChanges } from "./Watcher";
@@ -19,13 +19,9 @@ export function getApiRouter(options: IRunnerOptions) {
         }));
     });
 
-    router.post("/reload", async (req, res) => {
-        const stepDefinitionNames = await queryFilesByGlob(options.scriptsPath);
-
-        requireScripts(options, stepDefinitionNames);
-        resetId();
-
-        await initFeature(options);
+    router.post("/reload", async (req: Express.Request<{}, {}, { path?: string }>, res) => {
+        const path = req.body?.path ?? options.scriptsPath;
+        await reloadScripts(path);
         res.sendStatus(200);
     });
 
