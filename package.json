@@ -1,10 +1,23 @@
 {
   "name": "pickle-test-runner",
-  "version": "3.1.1",
+  "version": "3.1.2",
   "description": "",
   "main": "Runner.js",
   "type": "commonjs",
   "types": "Runner.d.ts",
+  "files": [
+    "/*.js",
+    "/*.js.map",
+    "bin/",
+    "Debugger/",
+    "Feature/",
+    "Step/",
+    "Utils/",
+    "!**/*.ts",
+    "/*.d.ts",
+    "{bin,Debugger,Feature,Step,Utils}/**/*.d.ts",
+    "!**/*.test.*"
+  ],
   "keywords": [
     "test",
     "library",
