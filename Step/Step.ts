@@ -46,6 +46,8 @@ export interface IStep {
     nextStepId?: number;
 }
 
+export const DEFAULT_STEP_TIMEOUT_MS = 60000;
+
 export const stepDefinitions = new Map<string | RegExp, IStepDefinition>();
 
 type TStepDefFn = (options: IRunnerOptions) => { pattern: TPattern, definition: IStepDefinition };
@@ -73,14 +75,18 @@ export function defineStep(firstArg: TPattern, secondArg: IStepOptions | TCallba
 
         if (typeof secondArg === "function") {
             thirdArg = secondArg;
-            secondArg = <IStepOptions>{ timeout: 60000 };
+            secondArg = <IStepOptions>{};
         }
+
+        // Apply the default even when an options object is passed without a timeout;
+        // otherwise setTimeout(undefined) fires almost immediately and the step fails.
+        const stepOptions: IStepOptions = { ...secondArg, timeout: secondArg.timeout ?? DEFAULT_STEP_TIMEOUT_MS };
 
         const expression = stepExpressionFactory(firstArg);
 
         return {
             pattern: firstArg,
-            definition: { pattern: firstArg, options: secondArg, cb: thirdArg, expression, filePath }
+            definition: { pattern: firstArg, options: stepOptions, cb: thirdArg, expression, filePath }
         }
     });
 }

@@ -1,4 +1,4 @@
-import * as Express from "express";
+import Express from "express";
 import * as Path from "path";
 import { IFeature, resetId } from "../Feature/Loader";
 import { IRunnerOptions } from "../Options";
@@ -21,11 +21,14 @@ export function startDebugger(port = 3001, feature: IFeature, options: IRunnerOp
         res.sendFile(Path.join(__dirname, "./Public/Index.html"));
     });
 
-    server.on("error", (err) => {
-        Log.error(err);
-    });
+    // Bind to loopback only: the API can execute steps and reload scripts, so it must not be reachable from the network.
+    server.listen(port, "127.0.0.1", (err?: Error) => {
+        // Express 5 reports startup failures (e.g. port already in use) here instead of throwing.
+        if (err) {
+            Log.error(`Debugger failed to start on port ${port}: ${err.message}`);
+            process.exit(1);
+        }
 
-    server.listen(port, () => {
         const url = `http://localhost:${port}/`;
         Log.info(`Debugger running on ${url}`);
 

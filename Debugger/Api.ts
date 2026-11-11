@@ -1,4 +1,4 @@
-import * as Express from "express";
+import Express from "express";
 import { executeStep } from "../Feature/Executor";
 import { resetId } from "../Feature/Loader";
 import { IRunnerOptions } from "../Options";
@@ -19,14 +19,14 @@ export function getApiRouter(options: IRunnerOptions) {
         }));
     });
 
-    router.post("/reload", async (req: Express.Request<{}, {}, { path?: string }>, res) => {
-        const path = req.body?.path ?? options.scriptsPath;
-        await reloadScripts(path);
+    router.post("/reload", async (req, res) => {
+        // Always reload from the configured scripts path; never accept a path from the request.
+        await reloadScripts(options.scriptsPath);
         res.sendStatus(200);
     });
 
     router.post("/reload/watch", async (req: Express.Request<{}, {}, { enable: boolean }>, res) => {
-        if (req.body.enable)
+        if (req.body?.enable)
             watchForChanges(options);
         else
             stopWatching();
@@ -40,7 +40,7 @@ export function getApiRouter(options: IRunnerOptions) {
 
     router.post("/feature/variables", (req: Express.Request<{}, {}, { variables: object }>, res) => {
         try {
-            context.variables = Object.assign({}, req.body.variables);
+            context.variables = Object.assign({}, req.body?.variables);
             res.status(200).send(context.variables);
         } catch (ex) {
             res.status(500).send(ex);

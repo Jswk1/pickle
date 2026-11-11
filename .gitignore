@@ -5,5 +5,5 @@ node_modules
 !bin/**/*
 tsconfig.tsbuildinfo
 !/Debugger/Public/**/*
-.vscode
+.vscode/*
 !/.vscode/launch.json

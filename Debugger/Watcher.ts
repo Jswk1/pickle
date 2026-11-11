@@ -26,7 +26,8 @@ export function watchForChanges(options: IRunnerOptions) {
     let timeout: NodeJS.Timeout;
 
     watcher.on("change", async (changedFilePath, stats) => {
-        if (!fileNameRegexp.test(changedFilePath))
+        // chokidar reports native separators (backslashes on Windows); the pattern regexp uses forward slashes.
+        if (!fileNameRegexp.test(toPosix(changedFilePath)))
             return;
 
         const absolutePath = Path.resolve(changedFilePath);
