@@ -5,6 +5,8 @@
 
 Lightweight version of CucumberJS library. Supports real-time test debugging.
 
+See [CHANGELOG.md](CHANGELOG.md) for what changed in each version.
+
 # Requirements
 
 Node.js 22.22 or newer.
@@ -92,6 +94,56 @@ defineStep("Checkbox state is set to {bool}.", async function (state: boolean) {
 });
 ```
 
+## Given, When, Then, And, But
+---
+Aliases of `defineStep`. Use whichever reads best; the keyword in the feature file does not have to match the function used to define the step.
+
+```typescript
+import { Given, When, Then } from "pickle-test-runner";
+
+Given("the user is logged in", async function () { /* ... */ });
+```
+
+## Step context: `this.variables`
+---
+Steps share data through `this.variables`. Each scenario starts with an empty `variables` object; Background steps run as part of each scenario and write into the same object.
+
+Define steps with `function`, not arrow functions: arrow functions do not receive `this`.
+
+```typescript
+Given("the user {string} exists", async function (name: string) {
+    this.variables.user = await createUser(name);
+});
+
+When("the user logs in", async function () {
+    await login(this.variables.user);
+});
+```
+
+## How a step is matched
+---
+*  String patterns match the whole step text. Values for `{int}`, `{decimal}`, `{string}` and custom expressions are converted and passed to the step function in order.
+*  For a regular expression, its capturing groups are passed as strings.
+*  If several definitions match, the one with the most `{...}` placeholders wins (a regular expression counts as none). If that is still a tie, the earliest definition wins.
+*  A step that matches nothing fails when the feature is loaded: `Unsupported step '...'`.
+
+## Hooks
+---
+```typescript
+import { beforeFeature, afterFeature, beforeScenario, afterScenario, beforeStep, afterStep } from "pickle-test-runner";
+
+beforeFeature(async (feature) => { });
+afterFeature(async (feature, outcome) => { });
+beforeScenario(async (scenario) => { });
+afterScenario(async (scenario, outcome) => { });
+beforeStep(async (scenario, step) => { });
+afterStep(async (scenario, step, outcome) => { });
+```
+*  Each hook holds one function: calling `beforeScenario` again replaces the previous function. With several step files, the one loaded last wins.
+*  `outcome.status` is `1` (ok), `2` (warning), `4` (error) or `8` (skipped); a step outcome also has `error` and `durationMs`.
+*  An error thrown in `beforeStep` fails that step. An error thrown in any other hook currently stops the whole run with exit code 1, without writing reports.
+*  In the debugger, only `beforeStep` and `afterStep` run.
+
 # CLI
 
 Command line usage:
@@ -129,6 +181,40 @@ pickle -r ./Flows/**/*.js -j ./junit.xml -o ./Output.log ./test.feature
 ```
 pickle --require ./Flows/**/*.js --junit ./junit.xml --output ./Output.log ./test.feature
 ```
+
+# Reports
+
+Every run prints its results and exits with code `0` when all steps pass, otherwise `1`. Optionally:
+*  `-j <path>` writes a JUnit XML report.
+*  `-o <path>` writes the run log (default `./Log/Log.log`).
+*  `--bridge-json <path>` writes a JSON report:
+
+```json
+{
+    "name": "Login",
+    "area": "Accounts",
+    "description": "Feature description",
+    "featureFileContent": "Feature: Login\n...",
+    "featureFullPath": "./features/login.feature",
+    "statusCount": { "ok": 3, "error": 0, "warning": 0, "skipped": 0 },
+    "scenarios": [
+        {
+            "name": "Log in",
+            "status": 1,
+            "steps": [
+                {
+                    "name": "Given the user is logged in",
+                    "status": 1,
+                    "filePath": "/app/steps/login.js:12:1",
+                    "durationMs": 35,
+                    "errorStack": "Error: ... (only for failed steps)"
+                }
+            ]
+        }
+    ]
+}
+```
+`status` is `1` (ok), `2` (warning), `4` (error) or `8` (skipped). `area` is set with `--bridge-json-area <name>` (empty otherwise), and `featureFullPath` is the feature path as given on the command line.
 
 # Step maps
 
@@ -172,11 +258,20 @@ Step maps only reduce the memory of the Node.js process. If your steps drive a b
 
 # Debugger
 
-Pickle test runner is delivered with web based debugging tool which allows running features in step by step mode. It is only reachable from the local machine (`http://localhost:<port>/`). Features:
+Pickle test runner is delivered with web based debugging tool which allows running features in step by step mode.
+
+```
+pickle -r "./steps/**/*.js" -d ./features/login.feature        # port 3001
+pickle -r "./steps/**/*.js" -d 4000 ./features/login.feature   # custom port
+```
+pickle loads the feature, starts the debugger and opens it in the browser. It is only reachable from the local machine (`http://localhost:<port>/`), and keeps running until you stop the process. Features:
 *  Run feature steps and pause at any time
 *  Step Breakpoints
-*  Ability to edit test variables during execution
+*  Ability to edit test variables during execution. Variables start empty when you move to another scenario, as in a normal run.
 *  On-demand reload of source files. Useful when step definitions are adjusted and you want to continue the test where it failed.
+*  Optional automatic reload: when switched on in the UI, pickle reloads step files from the `-r` path as they change.
+
+Only `beforeStep` and `afterStep` hooks run in the debugger, no reports are written, and `--use-step-map` cannot be used with it.
 
 The source for Pickle Debugger is available in separate repository. The compiled bundle.js and index.html file is built and included in Pickle Test Runner.
 
