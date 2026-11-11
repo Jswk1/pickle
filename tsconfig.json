@@ -9,7 +9,9 @@
         "noImplicitThis": true,
         "strictFunctionTypes": true,
         "incremental": true,
-        "allowSyntheticDefaultImports": true
+        "allowSyntheticDefaultImports": true,
+        "strict": false,
+        "types": ["node", "mocha"]
     },
     "exclude": [
         "node_modules",
