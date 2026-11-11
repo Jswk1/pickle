@@ -1,0 +1,41 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug Test1",
+            "program": "${workspaceFolder}/bin/pickle.js",
+            "sourceMaps": true,
+            "request": "launch",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "type": "node",
+            "runtimeArgs": [
+                "--enable-source-maps"
+            ],
+            "args": [
+                "--require",
+                "./Tests/**/*.js",
+                "--debug",
+                "./Tests/Test1/Test1.feature"
+            ]
+        },
+        {
+            "name": "Mocha (Test single file)",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceFolder}/node_modules/mocha/bin/mocha.js",
+            "runtimeArgs": [
+                "--enable-source-maps"
+            ],
+            "args": [
+                "--colors",
+                "--timeout",
+                "999999",
+                "${fileDirname}/${fileBasenameNoExtension}.js",
+            ],
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen"
+        }
+    ]
+}
