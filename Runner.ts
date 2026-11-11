@@ -9,10 +9,12 @@ import { queryFilesByGlob } from "./Utils/QueryFiles";
 import { Log } from "./Utils/Log";
 import { ReporterType, reportFeature } from "./Feature/Reporter/Factory";
 import { startDebugger } from "./Debugger/Server";
-import { loadStepDefinitions, stepDefinitions } from "./Step/Step";
+import { IStepDefinition, loadStepDefinitions, stepDefinitions } from "./Step/Step";
+import { setCurrentScriptFile } from "./Step/ScriptOrigin";
 import { IRunnerOptions, parseArgs } from "./Options";
+import { buildStepMaps } from "./Feature/StepMap";
 
-export function requireScripts(options: IRunnerOptions, fileNames: string[]) {
+export function requireScripts(options: IRunnerOptions, fileNames: string[], onRegistered?: (definition: IStepDefinition) => void) {
     // stepDefinitions.clear();
 
     const executionDirectory = process.cwd();
@@ -25,10 +27,17 @@ export function requireScripts(options: IRunnerOptions, fileNames: string[]) {
             delete require.cache[modulePath];
     }
 
-    for (const filePath of fullPaths)
-        require(filePath);
+    for (const filePath of fullPaths) {
+        // Lets steps, hooks and expressions record which file registered them (used by step maps).
+        setCurrentScriptFile(Path.resolve(filePath));
+        try {
+            require(filePath);
+        } finally {
+            setCurrentScriptFile(null);
+        }
+    }
 
-    loadStepDefinitions(options);
+    loadStepDefinitions(options, onRegistered);
 }
 
 export let feature: IFeature;
@@ -43,6 +52,15 @@ export let options: IRunnerOptions;
 export default async function execute(initialOptions: IRunnerOptions = { killOnFinish: true }) {
     try {
         options = Object.assign({}, initialOptions, parseArgs());
+
+        if (options.buildStepMaps) {
+            await buildStepMaps(options);
+
+            if (options.killOnFinish)
+                process.exit(0);
+
+            return;
+        }
 
         if (!options.logOutputPath)
             options.logOutputPath = "./Log/Log.log";

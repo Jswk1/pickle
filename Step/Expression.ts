@@ -1,4 +1,5 @@
 import { IStep, TPattern } from "./Step";
+import { recordGlobalRegistration } from "./ScriptOrigin";
 
 export const stepExpressions = new Map<string, IStepExpressionDef>();
 
@@ -16,6 +17,7 @@ export interface IStepExpression {
 }
 
 export function defineExpression(expr: IStepExpressionDef) {
+    recordGlobalRegistration(`{${expr.key}} expression`);
     stepExpressions.set(expr.key, expr);
 }
 
