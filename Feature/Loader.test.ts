@@ -156,4 +156,84 @@ describe("loadFeature", () => {
         expect(feature.scenarios[2].nextScenarioId).to.be.equal(feature.scenarios[3].id);
         expect(feature.scenarios[3].nextScenarioId).to.be.equal(undefined);
     });
+
+    describe("Gherkin keywords inside text (issue #9)", () => {
+        Then("the page title is {string}", async (title: string) => { });
+        Given("the user reads {string}", async (text: string) => { });
+        When("the user types {string} into the field", async (text: string) => { });
+
+        loadStepDefinitions({});
+
+        it("should not split a scenario on a keyword inside a step", () => {
+            const feature = loadFeature(`
+            Feature: Keywords in steps
+                Scenario: Titles
+                    Then the page title is "Scenario: test"
+                    And the user reads "Background: none"
+                    And the user reads "Scenario Outline: maybe"
+            `);
+
+            expect(feature.scenarios.length).to.be.equal(1);
+            expect(feature.backgroundSteps.length).to.be.equal(0);
+            expect(feature.scenarios[0].steps.map(e => e.name)).to.deep.equal([
+                `the page title is "Scenario: test"`,
+                `the user reads "Background: none"`,
+                `the user reads "Scenario Outline: maybe"`
+            ]);
+        });
+
+        it("should keep a keyword inside the feature description as text", () => {
+            const feature = loadFeature(`
+            Feature: Keywords in description
+                Login. Background: users must exist.
+                Scenario: S
+                    Then the page title is "Home"
+            `);
+
+            expect(feature.description).to.be.equal("Login. Background: users must exist.");
+            expect(feature.backgroundSteps.length).to.be.equal(0);
+            expect(feature.scenarios.length).to.be.equal(1);
+        });
+
+        it("should not treat 'Examples:' inside a step of an outline as the examples table", () => {
+            const feature = loadFeature(`
+            Feature: Keywords in outline
+                Scenario Outline: Typing
+                    When the user types "Examples: <text>" into the field
+
+                    Examples:
+                    | text |
+                    | a    |
+                    | b    |
+            `);
+
+            expect(feature.scenarios.map(e => e.steps[0].name)).to.deep.equal([
+                `the user types "Examples: a" into the field`,
+                `the user types "Examples: b" into the field`
+            ]);
+        });
+
+        it("should read the feature name from files with a byte order mark and Windows line endings", () => {
+            const content = "\uFEFFFeature: With BOM\r\n    Description\r\n    Scenario: S\r\n        Then the page title is \"x\"\r\n";
+            const feature = loadFeature(content);
+
+            expect(feature.name).to.be.equal("With BOM");
+            expect(feature.description).to.be.equal("Description");
+            expect(feature.scenarios.length).to.be.equal(1);
+        });
+
+        it("should still recognise lowercase keywords at the start of a line", () => {
+            const feature = loadFeature(`
+            feature: Lowercase
+                background:
+                    Given the user reads "x"
+                scenario: S
+                    Then the page title is "y"
+            `);
+
+            expect(feature.name).to.be.equal("Lowercase");
+            expect(feature.backgroundSteps.length).to.be.equal(1);
+            expect(feature.scenarios.length).to.be.equal(1);
+        });
+    });
 });

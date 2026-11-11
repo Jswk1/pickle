@@ -35,9 +35,12 @@ export function resetId() {
 }
 
 export function loadFeature(featureFileContent: string) {
+    featureFileContent = featureFileContent.replace(/^\uFEFF/, ""); // Byte order mark some editors add; keywords must start a line
     featureFileContent = featureFileContent.replace(/^(?:\s*|\s*#.*?)$/mgs, ""); // Clear comments and empty lines
 
-    const gherkinSectionExpr = /(?:(Feature|Background|Scenario Outline|Scenario)):([\S ]*)(.*?)(?=(?:Background|Scenario Outline|Scenario):|$)/gsi;
+    // Section keywords only count at the start of a line, so text like `Then the title is "Scenario: x"` stays part of its step.
+    // With the m flag, ^ matches line starts; (?![\s\S]) is the end of the whole content.
+    const gherkinSectionExpr = /^[ \t]*(Feature|Background|Scenario Outline|Scenario):([^\r\n]*)(.*?)(?=^[ \t]*(?:Background|Scenario Outline|Scenario):|(?![\s\S]))/gsim;
     const gherkinSectionList = Array.from(featureFileContent.matchAll(gherkinSectionExpr));
 
     if (gherkinSectionList.length === 0)
@@ -94,7 +97,7 @@ export function loadFeature(featureFileContent: string) {
 }
 
 function loadOutline(name: string, content: string) {
-    const examplesSecionRegexp = /Examples:\s*(\|.*\|)/si;
+    const examplesSecionRegexp = /^[ \t]*Examples:\s*(\|.*\|)/sim;
     const examplesMatch = examplesSecionRegexp.exec(content);
 
     if (!examplesMatch)
