@@ -19,9 +19,9 @@ export function getApiRouter(options: IRunnerOptions) {
         }));
     });
 
-    router.post("/reload", async (req: Express.Request<{}, {}, { path?: string }>, res) => {
-        const path = req.body?.path ?? options.scriptsPath;
-        await reloadScripts(path);
+    router.post("/reload", async (req, res) => {
+        // Always reload from the configured scripts path; never accept a path from the request.
+        await reloadScripts(options.scriptsPath);
         res.sendStatus(200);
     });
 

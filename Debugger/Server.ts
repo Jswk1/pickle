@@ -25,7 +25,8 @@ export function startDebugger(port = 3001, feature: IFeature, options: IRunnerOp
         Log.error(err);
     });
 
-    server.listen(port, () => {
+    // Bind to loopback only: the API can execute steps and reload scripts, so it must not be reachable from the network.
+    server.listen(port, "127.0.0.1", () => {
         const url = `http://localhost:${port}/`;
         Log.info(`Debugger running on ${url}`);
 
