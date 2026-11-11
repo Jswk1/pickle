@@ -1,6 +1,6 @@
 {
   "name": "pickle-test-runner",
-  "version": "2.2.5",
+  "version": "3.0.0",
   "description": "",
   "main": "Runner.js",
   "type": "commonjs",
@@ -24,6 +24,9 @@
   },
   "author": "Jan Siwek",
   "license": "MIT",
+  "engines": {
+    "node": ">=22.22"
+  },
   "bugs": {
     "url": "https://github.com/Jswk1/pickle/issues"
   },
