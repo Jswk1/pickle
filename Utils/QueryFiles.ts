@@ -73,10 +73,11 @@ export function extractEntryDirectory(globPattern: string) {
     if (/^[A-Za-z]:\//.test(finalPath))
         return finalPath;
 
-    if (!finalPath.startsWith("/"))
-        return "/" + finalPath;
+    if (globPattern.startsWith("/"))
+        return finalPath || "/";
 
-    return finalPath;
+    // Anything else is relative to the working directory ("Tests/**/*.js" -> "Tests", "**/*.js" -> ".").
+    return finalPath || ".";
 }
 
 export function toPosix(path: string) {
