@@ -5,6 +5,19 @@
   "main": "Runner.js",
   "type": "commonjs",
   "types": "Runner.d.ts",
+  "files": [
+    "/*.js",
+    "/*.js.map",
+    "bin/",
+    "Debugger/",
+    "Feature/",
+    "Step/",
+    "Utils/",
+    "!**/*.ts",
+    "/*.d.ts",
+    "{bin,Debugger,Feature,Step,Utils}/**/*.d.ts",
+    "!**/*.test.*"
+  ],
   "keywords": [
     "test",
     "library",
