@@ -123,6 +123,11 @@ describe("Step maps", () => {
                 const { When } = require("${runnerPath}");
                 When("the user adds {int} items", () => { });
             `);
+            write("steps/reports.js", `
+                const { Then } = require("${runnerPath}");
+                console.log("LOADED reports.js");
+                Then("the report is shown", () => { });
+            `);
             write("features/login.feature", `
 Feature: Login
     Scenario: Log in
@@ -148,6 +153,7 @@ Feature: Cart
             const loginMap: IStepMap = JSON.parse(Fs.readFileSync(Path.join(root, "features", "login.feature" + STEP_MAP_SUFFIX), "utf-8"));
             const loginContent = Fs.readFileSync(Path.join(root, "features", "login.feature"), "utf-8");
             expect(loginMap.files).to.deep.equal(["../steps/login.js"]);
+            expect(loginMap.alwaysFiles).to.deep.equal(["../steps/common/hooks.js"]);
             expect(loginMap.featureHash).to.equal(hashFeature(loginContent));
 
             const cartMap: IStepMap = JSON.parse(Fs.readFileSync(Path.join(root, "features", "cart", "cart.feature" + STEP_MAP_SUFFIX), "utf-8"));
@@ -179,6 +185,114 @@ Feature: Broken
 
             expect(result.status).to.equal(1);
             expect(result.output).to.contain("--build-step-maps requires --always");
+        });
+    });
+
+    describe("pickle --use-step-map (CLI)", function () {
+        this.timeout(30000);
+
+        const pickleBin = Path.join(__dirname, "..", "bin", "pickle.js");
+        const runnerPath = Path.join(__dirname, "..", "Runner").split(Path.sep).join("/");
+        let root: string;
+
+        function write(relativePath: string, content: string) {
+            const fullPath = Path.join(root, relativePath);
+            Fs.mkdirSync(Path.dirname(fullPath), { recursive: true });
+            Fs.writeFileSync(fullPath, content);
+        }
+
+        function run(...args: string[]) {
+            try {
+                return { status: 0, output: execFileSync(process.execPath, [pickleBin, ...args], { cwd: root, encoding: "utf-8", stdio: "pipe" }) };
+            } catch (ex) {
+                return { status: ex.status as number, output: `${ex.stdout}${ex.stderr}` };
+            }
+        }
+
+        function buildMaps() {
+            const result = run("--build-step-maps", "-r", "steps/**/*.js", "--always", "steps/common/**/*.js", "features/**/*.feature");
+            expect(result.status, result.output).to.equal(0);
+        }
+
+        beforeEach(() => {
+            root = Fs.mkdtempSync(Path.join(Os.tmpdir(), "pickle-stepmap-run-"));
+
+            write("steps/common/hooks.js", `
+                const { beforeScenario, Given } = require("${runnerPath}");
+                beforeScenario(() => console.log("HOOK beforeScenario"));
+                Given("the app is open", () => { });
+            `);
+            write("steps/login.js", `
+                const { When } = require("${runnerPath}");
+                When("the user logs in", () => { });
+            `);
+            write("steps/reports.js", `
+                const { Then } = require("${runnerPath}");
+                console.log("LOADED reports.js");
+                Then("the report is shown", () => { });
+            `);
+            write("features/login.feature", `
+Feature: Login
+    Scenario: Log in
+        Given the app is open
+        When the user logs in
+`);
+        });
+
+        afterEach(() => {
+            Fs.rmSync(root, { recursive: true, force: true });
+        });
+
+        it("should run the feature loading only the always-loaded files and the mapped ones", () => {
+            buildMaps();
+
+            const result = run("-r", "steps/common/**/*.js", "--use-step-map", "features/login.feature", "-o", "out.log");
+
+            expect(result.status, result.output).to.equal(0);
+            expect(result.output).to.contain("1 always-loaded files and 1 files from the step map loaded.");
+            expect(result.output).to.contain("HOOK beforeScenario");
+            expect(result.output).to.contain("Test result: 2/2");
+            expect(result.output).to.not.contain("LOADED reports.js");
+        });
+
+        it("should still load every file without --use-step-map", () => {
+            const result = run("-r", "steps/**/*.js", "features/login.feature", "-o", "out.log");
+
+            expect(result.status, result.output).to.equal(0);
+            expect(result.output).to.contain("LOADED reports.js");
+        });
+
+        it("should fail when the feature has no step map", () => {
+            const result = run("-r", "steps/common/**/*.js", "--use-step-map", "features/login.feature");
+
+            expect(result.status).to.equal(1);
+            expect(result.output).to.contain("No step map for features/login.feature");
+        });
+
+        it("should fail when the feature changed after the map was built", () => {
+            buildMaps();
+            Fs.appendFileSync(Path.join(root, "features", "login.feature"), "        When the user logs in\n");
+
+            const result = run("-r", "steps/common/**/*.js", "--use-step-map", "features/login.feature");
+
+            expect(result.status).to.equal(1);
+            expect(result.output).to.contain("was built from a different version of features/login.feature");
+        });
+
+        it("should fail when -r does not load the files the map was built with as always loaded", () => {
+            buildMaps();
+
+            const result = run("-r", "steps/login.js", "--use-step-map", "features/login.feature");
+
+            expect(result.status).to.equal(1);
+            expect(result.output).to.contain("always-loaded files that -r does not load in this run: steps/common/hooks.js");
+        });
+
+        it("should not allow --use-step-map with --debug", () => {
+            const result = run("-r", "steps/common/**/*.js", "--use-step-map", "--debug", "features/login.feature");
+
+            expect(result.status).to.equal(1);
+            expect(result.output).to.contain("--use-step-map cannot be used with --debug");
         });
     });
 });

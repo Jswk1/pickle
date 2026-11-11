@@ -24,6 +24,8 @@ export interface IStepMap {
     version: number;
     /** Hash of the feature file the map was built from. */
     featureHash: string;
+    /** The --always files the map was built with, relative to the map file. A run must load all of them via -r. */
+    alwaysFiles: string[];
     /** Step files to load in addition to the always-loaded ones, relative to the map file, in load order. */
     files: string[];
 }
@@ -133,6 +135,49 @@ export function computeStepMapFiles(feature: IFeature, registrations: IStepDefin
     return { files, problems };
 }
 
+/**
+ * Reads the step map of a feature for a --use-step-map run and returns the absolute paths of the step files
+ * it lists. Throws if the map is missing, was built from a different version of the feature, or expects
+ * always-loaded files that this run does not load.
+ *
+ * @param alwaysLoadedFiles Absolute paths of the files this run loads through -r.
+ */
+export async function readStepMapFiles(featureFullPath: string, featureContent: string, alwaysLoadedFiles: string[]) {
+    const mapPath = getStepMapPath(featureFullPath);
+    const rebuildHint = "Rebuild the step maps with --build-step-maps.";
+
+    if (!await FsAsync.exists(mapPath))
+        throw new Error(`No step map for ${relative(featureFullPath)}: expected ${relative(mapPath)}. ${rebuildHint}`);
+
+    let map: IStepMap;
+    try {
+        map = JSON.parse(await FsAsync.readFile(mapPath));
+    } catch (ex) {
+        throw new Error(`Step map ${relative(mapPath)} is not valid JSON: ${ex.message}. ${rebuildHint}`);
+    }
+
+    if (map.version !== STEP_MAP_VERSION)
+        throw new Error(`Step map ${relative(mapPath)} has version ${map.version}, but this pickle reads version ${STEP_MAP_VERSION}. ${rebuildHint}`);
+
+    if (map.featureHash !== hashFeature(featureContent))
+        throw new Error(`Step map ${relative(mapPath)} was built from a different version of ${relative(featureFullPath)}. ${rebuildHint}`);
+
+    const fromMap = (filePath: string) => Path.resolve(Path.dirname(mapPath), filePath);
+
+    const loaded = new Set(alwaysLoadedFiles.map(e => Path.resolve(e)));
+    const notLoaded = map.alwaysFiles.map(fromMap).filter(e => !loaded.has(e));
+    if (notLoaded.length)
+        throw new Error(`Step map ${relative(mapPath)} was built with always-loaded files that -r does not load in this run: ${notLoaded.map(relative).join(", ")}. Use the same files for -r here as for --always when building the maps.`);
+
+    const files = map.files.map(fromMap);
+    for (const filePath of files) {
+        if (!await FsAsync.exists(filePath))
+            throw new Error(`Step map ${relative(mapPath)} lists ${relative(filePath)}, which does not exist. ${rebuildHint}`);
+    }
+
+    return files;
+}
+
 /** Builds and writes a step map next to every feature matched by options.featurePath. */
 export async function buildStepMaps(options: IRunnerOptions) {
     const toAbsolute = (filePath: string) => Path.resolve(process.cwd(), filePath);
@@ -177,12 +222,14 @@ export async function buildStepMaps(options: IRunnerOptions) {
         problems.push(...result.problems.map(e => `${relative(featurePath)}: ${e}`));
 
         const mapPath = getStepMapPath(featurePath);
+        const relativeToMap = (filePath: string) => toPosix(Path.relative(Path.dirname(mapPath), filePath));
         maps.push({
             path: mapPath,
             map: {
                 version: STEP_MAP_VERSION,
                 featureHash: hashFeature(content),
-                files: result.files.map(e => toPosix(Path.relative(Path.dirname(mapPath), e)))
+                alwaysFiles: alwaysFiles.map(relativeToMap),
+                files: result.files.map(relativeToMap)
             }
         });
     }

@@ -12,7 +12,7 @@ import { startDebugger } from "./Debugger/Server";
 import { IStepDefinition, loadStepDefinitions, stepDefinitions } from "./Step/Step";
 import { setCurrentScriptFile } from "./Step/ScriptOrigin";
 import { IRunnerOptions, parseArgs } from "./Options";
-import { buildStepMaps } from "./Feature/StepMap";
+import { buildStepMaps, readStepMapFiles } from "./Feature/StepMap";
 
 export function requireScripts(options: IRunnerOptions, fileNames: string[], onRegistered?: (definition: IStepDefinition) => void) {
     // stepDefinitions.clear();
@@ -65,13 +65,26 @@ export default async function execute(initialOptions: IRunnerOptions = { killOnF
         if (!options.logOutputPath)
             options.logOutputPath = "./Log/Log.log";
 
-        const stepDefinitionFileNames = await queryFilesByGlob(options.scriptsPath);
-        requireScripts(options, stepDefinitionFileNames);
-
-        Log.info(`${stepDefinitionFileNames.length} files loaded.`);
-
         const featureFullPath = Path.isAbsolute(options.featurePath) ? options.featurePath : Path.join(process.cwd(), options.featurePath);
         options.featureFullPath = featureFullPath;
+
+        const stepDefinitionFileNames = await queryFilesByGlob(options.scriptsPath);
+
+        if (options.useStepMap) {
+            // -r holds only the always-loaded files; the feature's step map adds the ones it needs.
+            const alwaysLoadedFiles = stepDefinitionFileNames.map(e => Path.resolve(e));
+            const featureContent = await loadFeatureFile(featureFullPath);
+            const mapFiles = await readStepMapFiles(featureFullPath, featureContent, alwaysLoadedFiles);
+            const alwaysSet = new Set(alwaysLoadedFiles);
+
+            requireScripts(options, [...alwaysLoadedFiles, ...mapFiles.filter(e => !alwaysSet.has(e))]);
+
+            Log.info(`${alwaysLoadedFiles.length} always-loaded files and ${mapFiles.length} files from the step map loaded.`);
+        } else {
+            requireScripts(options, stepDefinitionFileNames);
+
+            Log.info(`${stepDefinitionFileNames.length} files loaded.`);
+        }
 
         await initFeature(options);
 
