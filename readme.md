@@ -1,9 +1,13 @@
-[![Build Status](https://app.travis-ci.com/Jswk1/pickle.svg?branch=master)](https://app.travis-ci.com/Jswk1/pickle)
+[![Node.js CI](https://github.com/Jswk1/pickle/actions/workflows/node.js.yml/badge.svg?branch=master)](https://github.com/Jswk1/pickle/actions/workflows/node.js.yml)
 
 
 # About
 
-Lighweight version of CucumberJS library. Supports real-time test debugging.
+Lightweight version of CucumberJS library. Supports real-time test debugging.
+
+# Requirements
+
+Node.js 22.22 or newer.
 
 # API
 
@@ -14,13 +18,13 @@ Lighweight version of CucumberJS library. Supports real-time test debugging.
 #### IOptions:
 ```typescript
 {
-    timeoutMS?: number; // (default 10000ms)
+    timeout?: number; // in milliseconds (default 60000ms)
 }
 ```
 
 Examples:
 ```typescript
-defineStep("It should open a browser.", { timeoutMS: 5000 }, async function () {
+defineStep("It should open a browser.", { timeout: 5000 }, async function () {
     // step body
 });
 
@@ -76,7 +80,7 @@ Example:
 defineExpression({
     key: "bool",
     pattern: /true|false/,
-    parser: v => v === "true" ? true : v === "false" ? false : new Error("Value is in incorrect format.");
+    parser: v => v === "true" ? true : v === "false" ? false : new Error("Value is in incorrect format.")
 });
 
 // Usage
@@ -92,14 +96,18 @@ defineStep("Checkbox state is set to {bool}.", async function (state: boolean) {
 
 Command line usage:
 ```
-pickle [(-r, --require <glob_expr>), (-j, --junit <xml_path>), (-o, --output <log_path>), -d] <feature_path>
+pickle [(-r, --require <glob_expr>), (-j, --junit <xml_path>), (-o, --output <log_path>), (-d [port])] <feature_path>
 ```
 
 Parameters:
 *  `-r <glob_expr>` `--require <glob_expr>` - Path to directory with all step definitions. Should end with *.js or (preferably) *.ts
 *  `-j <xml_path>` `--junit <xml_path>` - Path to save the JUnit xml with test execution summary
-*  `-o <log_path>` `--output <log_path>` - Path to save the test execution log
-*  `-d` `--debug` - Execute test in debug mode. For details please take a look a the `Debugger` section.
+*  `-o <log_path>` `--output <log_path>` - Path to save the test execution log. Default is `./Log/Log.log`.
+*  `--bridge-json <json_path>` - Path to save the Bridge JSON report
+*  `--bridge-json-area <name>` - Area name to include in the Bridge JSON report
+*  `-d [port]` `--debug [port]` - Execute test in debug mode. Default port is 3001. For details please take a look at the `Debugger` section.
+*  `--dont-kill` - Don't exit the process when the run finishes
+*  `--duplicate-warn` - Log a warning when the same step pattern is defined more than once
 *  `--trace-size <number>` - Increase the error stack trace size. Default is 20.
 
 Examples:
@@ -121,7 +129,7 @@ pickle --require ./Flows/**/*.js --junit ./junit.xml --output ./Output.log ./tes
 
 # Debugger
 
-Pickle test runner is delivered with web based debugging tool which allows running features in step by step mode. Features:
+Pickle test runner is delivered with web based debugging tool which allows running features in step by step mode. It is only reachable from the local machine (`http://localhost:<port>/`). Features:
 *  Run feature steps and pause at any time
 *  Step Breakpoints
 *  Ability to edit test variables during execution
