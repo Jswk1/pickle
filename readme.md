@@ -109,6 +109,9 @@ Parameters:
 *  `--dont-kill` - Don't exit the process when the run finishes
 *  `--duplicate-warn` - Log a warning when the same step pattern is defined more than once
 *  `--trace-size <number>` - Increase the error stack trace size. Default is 20.
+*  `--build-step-maps` - Write a step map next to every feature instead of running tests. Requires `--always`. See `Step maps`.
+*  `--always <glob_expr>` - With `--build-step-maps`: the step files that are loaded for every feature.
+*  `--use-step-map` - Load only the `-r` files plus the step files listed in the feature's step map. See `Step maps`.
 
 Examples:
 
@@ -126,6 +129,46 @@ pickle -r ./Flows/**/*.js -j ./junit.xml -o ./Output.log ./test.feature
 ```
 pickle --require ./Flows/**/*.js --junit ./junit.xml --output ./Output.log ./test.feature
 ```
+
+# Step maps
+
+By default pickle loads every step file matched by `-r` for every feature, along with everything those files import. When many features run in parallel, each process pays for the whole step library even though a feature uses only a few steps.
+
+Step maps record, for each feature, which step files it needs, so a run can load only those. Build them once (for example when building the test image), then run with `--use-step-map`. Local development needs neither: without the flags pickle loads everything, as before.
+
+#### 1. Put shared files in one folder
+
+Files that every feature needs go in one folder, loaded for every run:
+*  files that register hooks (`beforeFeature`, `beforeScenario`, ...),
+*  files that register custom expressions (`defineExpression`),
+*  shared setup that other step files depend on being loaded.
+
+Building the maps fails if a file that registers hooks or expressions is outside this folder.
+
+#### 2. Build the maps
+```
+pickle --build-step-maps -r "./steps/**/*.js" --always "./steps/common/**/*.js" "./features/**/*.feature"
+```
+pickle loads all step files (without running anything), resolves every feature, and writes `<feature>.stepmap.json` next to each one: a hash of the feature, the `--always` files, and the other step files the feature needs. Paths are relative to the map file, so the project can be moved after building, e.g. built in `/src` and run from `/app`.
+
+The build writes no maps and exits with an error listing every problem if:
+*  a file that registers hooks or expressions is not matched by `--always`,
+*  a step used by a feature is defined in more than one file (which definition wins depends on load order, and the always-loaded files load first in step-map runs),
+*  a feature uses a step that is not defined, or a step would resolve differently with only the mapped files loaded.
+
+#### 3. Run with the maps
+```
+pickle -r "./steps/common/**/*.js" --use-step-map ./features/login.feature
+```
+`-r` points at the always-loaded files (the same files as `--always` when building); pickle adds the files from `login.feature.stepmap.json`. The run fails before executing anything, asking to rebuild the maps, if:
+*  the feature has no step map, or the map is from a different pickle map version,
+*  the feature changed after its map was built,
+*  a file listed in the map does not exist,
+*  `-r` does not load all of the files that were `--always` when the map was built.
+
+`--use-step-map` cannot be combined with `--debug`.
+
+Step maps only reduce the memory of the Node.js process. If your steps drive a browser (e.g. Puppeteer), the browser processes are not affected.
 
 # Debugger
 
