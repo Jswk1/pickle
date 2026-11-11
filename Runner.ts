@@ -9,10 +9,12 @@ import { queryFilesByGlob } from "./Utils/QueryFiles";
 import { Log } from "./Utils/Log";
 import { ReporterType, reportFeature } from "./Feature/Reporter/Factory";
 import { startDebugger } from "./Debugger/Server";
-import { loadStepDefinitions, stepDefinitions } from "./Step/Step";
+import { IStepDefinition, loadStepDefinitions, stepDefinitions } from "./Step/Step";
+import { setCurrentScriptFile } from "./Step/ScriptOrigin";
 import { IRunnerOptions, parseArgs } from "./Options";
+import { buildStepMaps, readStepMapFiles } from "./Feature/StepMap";
 
-export function requireScripts(options: IRunnerOptions, fileNames: string[]) {
+export function requireScripts(options: IRunnerOptions, fileNames: string[], onRegistered?: (definition: IStepDefinition) => void) {
     // stepDefinitions.clear();
 
     const executionDirectory = process.cwd();
@@ -25,10 +27,17 @@ export function requireScripts(options: IRunnerOptions, fileNames: string[]) {
             delete require.cache[modulePath];
     }
 
-    for (const filePath of fullPaths)
-        require(filePath);
+    for (const filePath of fullPaths) {
+        // Lets steps, hooks and expressions record which file registered them (used by step maps).
+        setCurrentScriptFile(Path.resolve(filePath));
+        try {
+            require(filePath);
+        } finally {
+            setCurrentScriptFile(null);
+        }
+    }
 
-    loadStepDefinitions(options);
+    loadStepDefinitions(options, onRegistered);
 }
 
 export let feature: IFeature;
@@ -44,16 +53,38 @@ export default async function execute(initialOptions: IRunnerOptions = { killOnF
     try {
         options = Object.assign({}, initialOptions, parseArgs());
 
+        if (options.buildStepMaps) {
+            await buildStepMaps(options);
+
+            if (options.killOnFinish)
+                process.exit(0);
+
+            return;
+        }
+
         if (!options.logOutputPath)
             options.logOutputPath = "./Log/Log.log";
 
-        const stepDefinitionFileNames = await queryFilesByGlob(options.scriptsPath);
-        requireScripts(options, stepDefinitionFileNames);
-
-        Log.info(`${stepDefinitionFileNames.length} files loaded.`);
-
         const featureFullPath = Path.isAbsolute(options.featurePath) ? options.featurePath : Path.join(process.cwd(), options.featurePath);
         options.featureFullPath = featureFullPath;
+
+        const stepDefinitionFileNames = await queryFilesByGlob(options.scriptsPath);
+
+        if (options.useStepMap) {
+            // -r holds only the always-loaded files; the feature's step map adds the ones it needs.
+            const alwaysLoadedFiles = stepDefinitionFileNames.map(e => Path.resolve(e));
+            const featureContent = await loadFeatureFile(featureFullPath);
+            const mapFiles = await readStepMapFiles(featureFullPath, featureContent, alwaysLoadedFiles);
+            const alwaysSet = new Set(alwaysLoadedFiles);
+
+            requireScripts(options, [...alwaysLoadedFiles, ...mapFiles.filter(e => !alwaysSet.has(e))]);
+
+            Log.info(`${alwaysLoadedFiles.length} always-loaded files and ${mapFiles.length} files from the step map loaded.`);
+        } else {
+            requireScripts(options, stepDefinitionFileNames);
+
+            Log.info(`${stepDefinitionFileNames.length} files loaded.`);
+        }
 
         await initFeature(options);
 

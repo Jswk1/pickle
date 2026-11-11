@@ -4,6 +4,7 @@ import { IRunnerOptions } from "../Options";
 import { Log } from "../Utils/Log";
 import { getExecutionFileName } from "../Utils/Trace";
 import { IStepExpression, stepExpressionFactory } from "./Expression";
+import { getCurrentScriptFile, recordGlobalRegistration } from "./ScriptOrigin";
 
 export type TContext<T = { [key: string]: any }> = {
     variables: {
@@ -22,6 +23,8 @@ export interface IStepDefinition {
     cb: TCallbackFuntion;
     expression: IStepExpression;
     filePath?: string;
+    /** Absolute path of the step file whose loading registered this definition (null if registered outside the runner's loading). */
+    scriptFile?: string;
 }
 
 interface IStepOptions {
@@ -53,12 +56,17 @@ export const stepDefinitions = new Map<string | RegExp, IStepDefinition>();
 type TStepDefFn = (options: IRunnerOptions) => { pattern: TPattern, definition: IStepDefinition };
 const stepDefinitionQueue: Array<TStepDefFn> = [];
 
-export function loadStepDefinitions(options: IRunnerOptions) {
+/**
+ * @param onRegistered Called for every definition in registration order, including ones later
+ *                     overwritten by a duplicate pattern (used to build step maps).
+ */
+export function loadStepDefinitions(options: IRunnerOptions, onRegistered?: (definition: IStepDefinition) => void) {
     let fn: TStepDefFn;
 
     while (fn = stepDefinitionQueue.shift()) {
         const { pattern, definition } = fn(options);
         stepDefinitions.set(pattern, definition);
+        onRegistered?.(definition);
     }
 }
 
@@ -69,6 +77,7 @@ export function defineStep(regexp: RegExp, options: IStepOptions, cb?: TCallback
 export function defineStep(firstArg: TPattern, secondArg: IStepOptions | TCallbackFuntion, thirdArg?: TCallbackFuntion): void;
 export function defineStep(firstArg: TPattern, secondArg: IStepOptions | TCallbackFuntion, thirdArg?: TCallbackFuntion) {
     const filePath = getExecutionFileName();
+    const scriptFile = getCurrentScriptFile();
     stepDefinitionQueue.push((options: IRunnerOptions) => {
         if (options.warnForDuplicatedSteps && stepDefinitions.has(firstArg))
             Log.warn(`Step '${firstArg}' is defined multiple times.`);
@@ -86,13 +95,13 @@ export function defineStep(firstArg: TPattern, secondArg: IStepOptions | TCallba
 
         return {
             pattern: firstArg,
-            definition: { pattern: firstArg, options: stepOptions, cb: thirdArg, expression, filePath }
+            definition: { pattern: firstArg, options: stepOptions, cb: thirdArg, expression, filePath, scriptFile }
         }
     });
 }
 
-export function findStepDefinition(step: string) {
-    let stepDefs = Array.from(stepDefinitions.values()).filter(e => e.expression.regexp.test(step));
+export function findStepDefinition(step: string, definitions: Iterable<IStepDefinition> = stepDefinitions.values()) {
+    let stepDefs = Array.from(definitions).filter(e => e.expression.regexp.test(step));
 
     if (!stepDefs.length)
         throw new Error(`Unsupported step '${step}'`);
@@ -118,9 +127,11 @@ export let beforeFeatureFn: (feature: IFeature) => TPromisable<void>;
 export let afterFeatureFn: (feature: IFeature, outcome: IFeatureOutcome) => TPromisable<void>;
 
 export function beforeFeature(fn: typeof beforeFeatureFn) {
+    recordGlobalRegistration("beforeFeature hook");
     beforeFeatureFn = fn;
 }
 export function afterFeature(fn: typeof afterFeatureFn) {
+    recordGlobalRegistration("afterFeature hook");
     afterFeatureFn = fn;
 }
 
@@ -128,9 +139,11 @@ export let beforeScenarioFn: (scenario: IScenario) => TPromisable<void>;
 export let afterScenarioFn: (scenario: IScenario, outcome: IScenarioOutcome) => TPromisable<void>;
 
 export function beforeScenario(fn: typeof beforeScenarioFn) {
+    recordGlobalRegistration("beforeScenario hook");
     beforeScenarioFn = fn;
 }
 export function afterScenario(fn: typeof afterScenarioFn) {
+    recordGlobalRegistration("afterScenario hook");
     afterScenarioFn = fn;
 }
 
@@ -138,8 +151,10 @@ export let beforeStepFn: (scenario: IScenario, step: IStep) => TPromisable<void>
 export let afterStepFn: (scenario: IScenario, step: IStep, outcome: IStepOutcome) => TPromisable<void>;
 
 export function beforeStep(fn: typeof beforeStepFn) {
+    recordGlobalRegistration("beforeStep hook");
     beforeStepFn = fn;
 }
 export function afterStep(fn: typeof afterStepFn) {
+    recordGlobalRegistration("afterStep hook");
     afterStepFn = fn;
 }
