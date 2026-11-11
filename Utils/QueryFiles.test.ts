@@ -15,6 +15,18 @@ describe("Glob Pattern Tests", () => {
             expect(extractEntryDirectory("./some/pa*th/te*st/*.exe")).to.equal("./some");
             expect(extractEntryDirectory("./**/*")).to.equal(".");
         });
+
+        it("should keep Windows absolute paths as they are", () => {
+            expect(extractEntryDirectory("C:/some/path/**/*.js")).to.equal("C:/some/path");
+            expect(extractEntryDirectory("c:/some/path")).to.equal("c:/some/path");
+            expect(extractEntryDirectory("C:/*.js")).to.equal("C:/");
+        });
+
+        if (process.platform === "win32") {
+            it("should accept Windows absolute paths with backslashes", () => {
+                expect(extractEntryDirectory("C:\\some\\path\\*.js")).to.equal("C:/some/path");
+            });
+        }
     });
 
     describe("createRegexFromPattern", () => {
